@@ -5,7 +5,7 @@ import clsx from "clsx";
 import Header from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
+import { fontMontserrat } from "@/config/fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -29,13 +29,13 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          fontMontserrat.variable
         )}
       >
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col overflow-hidden w-full">
           <Header />
 
-          <main className="container mx-auto max-w-7xl flex-grow px-6 pt-20">
+          <main className="flex column flex-grow overflow-hidden w-full">
             {children}
           </main>
 

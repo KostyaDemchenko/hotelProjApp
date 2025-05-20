@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +16,8 @@ import {
   ModalHeader,
   ModalBody,
 } from "@heroui/react";
+
+import imgObj from "@/public/images/utils";
 
 const MENU = [
   { href: "/", label: "Головна", icon: "ri-home-line" },
@@ -37,7 +40,7 @@ export default function Header() {
             className="text-xl font-bold tracking-tight text-primary"
             href="/"
           >
-            HotelName
+            В.О.Л.Я.
           </Link>
         </NavbarBrand>
 
