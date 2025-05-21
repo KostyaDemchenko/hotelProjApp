@@ -16,6 +16,8 @@ import {
   ModalBody,
 } from "@heroui/react";
 
+import Container from "@/components/Container";
+
 const MENU = [
   { href: "/", label: "Головна", icon: "ri-home-line" },
   { href: "/rooms", label: "Номери", icon: "ri-hotel-bed-line" },
@@ -29,7 +31,7 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <>
+    <Container>
       {/* Фиксированный top-navbar */}
       <Navbar className="fixed inset-x-0 top-0 z-30 border-b bg-white/80 backdrop-blur-md">
         <NavbarBrand>
@@ -108,6 +110,6 @@ export default function Header() {
           )}
         </ModalContent>
       </Modal>
-    </>
+    </Container>
   );
 }
