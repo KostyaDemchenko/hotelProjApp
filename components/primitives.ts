@@ -10,6 +10,10 @@ export const title = tv({
       cyan: "from-[#00b7fa] to-[#01cfea]",
       green: "from-[#6FEE8D] to-[#17c964]",
       pink: "from-[#FF72E1] to-[#F54C7A]",
+      default: "text-black-600",
+      muted: "text-black-100",
+      primary: "text-blue-600",
+      accent: "text-yellow-600",
     },
     size: {
       sm: "text-3xl lg:text-4xl",
@@ -18,6 +22,11 @@ export const title = tv({
     },
     fullWidth: {
       true: "w-full block",
+    },
+    align: {
+      left: "w-full text-left",
+      center: "w-full text-center",
+      right: "w-full text-right",
     },
   },
   defaultVariants: {

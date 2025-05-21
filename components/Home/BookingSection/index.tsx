@@ -7,6 +7,7 @@ import { uk } from "date-fns/locale";
 import { z } from "zod";
 
 import Container from "@/components/Container";
+import { title, subtitle, description } from "@/components/primitives";
 
 const bookingSchema = z.object({
   checkInDate: z
@@ -77,7 +78,7 @@ export default function BookingSection() {
     const result = bookingSchema.safeParse(form);
 
     if (!result.success) {
-      // Ошибки покажутся через useEffect
+      // Ошибки показываются через useEffect
       return;
     }
 
@@ -97,25 +98,27 @@ export default function BookingSection() {
     return format(date, "dd MMMM yyyy", { locale: uk });
   };
 
-  const iconClass = "absolute left-3 top-1/2  text-black-500";
+  const iconClass = "absolute left-3 top-[59%]  text-black-500";
 
   return (
     <div className="w-full bg-blue-100 p-6">
-      <Container>
-        <h2 className="text-2xl font-bold mb-4 text-black-800">
+      <Container className="flex flex-col w-full gap-[15px] items-start">
+        <h2
+          className={`${title({ size: "sm", color: "default", align: "center" })}`}
+        >
           Забронювати номер
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 relative">
+        <div className="grid grid-cols-1 w-full md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 relative">
           <div className="relative">
             <label
-              className="block text-sm font-medium text-black-700 mb-1"
+              className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="check-in-date"
             >
               Дата заселення
             </label>
             <input
-              className={`w-full p-2 bg-white border rounded-md ${
+              className={`w-full p-3 bg-white border rounded-md ${
                 errors.checkInDate ? "border-red-500" : "border-black-300"
               }`}
               id="check-in-date"
@@ -131,10 +134,16 @@ export default function BookingSection() {
               }
             />
             {submitted && errors.checkInDate && (
-              <p className="text-red-600 text-sm mt-1">{errors.checkInDate}</p>
+              <p
+                className={`${description({ color: "accent", size: "sm" })} mt-1`}
+              >
+                {errors.checkInDate}
+              </p>
             )}
             {form.checkInDate && !errors.checkInDate && (
-              <p className="text-sm mt-1 text-black-600">
+              <p
+                className={`${description({ color: "default", size: "sm" })} mt-1`}
+              >
                 {formatDate(form.checkInDate)}
               </p>
             )}
@@ -142,13 +151,13 @@ export default function BookingSection() {
 
           <div className="relative">
             <label
-              className="block text-sm font-medium text-black-700 mb-1"
+              className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="check-out-date"
             >
               Дата виселення
             </label>
             <input
-              className={`w-full p-2 bg-white border rounded-md ${
+              className={`w-full p-3 bg-white border rounded-md ${
                 errors.checkOutDate ? "border-red-500" : "border-black-300"
               }`}
               id="check-out-date"
@@ -169,10 +178,16 @@ export default function BookingSection() {
               }
             />
             {submitted && errors.checkOutDate && (
-              <p className="text-red-600 text-sm mt-1">{errors.checkOutDate}</p>
+              <p
+                className={`${description({ color: "accent", size: "sm" })} mt-1`}
+              >
+                {errors.checkOutDate}
+              </p>
             )}
             {form.checkOutDate && !errors.checkOutDate && (
-              <p className="text-sm mt-1 text-black-600">
+              <p
+                className={`${description({ color: "default", size: "sm" })} mt-1`}
+              >
                 {formatDate(form.checkOutDate)}
               </p>
             )}
@@ -180,14 +195,14 @@ export default function BookingSection() {
 
           <div className="relative">
             <label
-              className="block text-sm font-medium text-black-700 mb-1"
+              className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="adults-select"
             >
               Дорослі
             </label>
             <i className={`${iconClass} ri-user-line`} />
             <select
-              className="w-full p-2 pl-10 bg-white border border-black-300 rounded-md appearance-none"
+              className="w-full p-3 pl-10 bg-white border border-black-300 rounded-md appearance-none"
               id="adults-select"
               value={form.adults}
               onChange={(e) =>
@@ -204,14 +219,14 @@ export default function BookingSection() {
 
           <div className="relative">
             <label
-              className="block text-sm font-medium text-black-700 mb-1"
+              className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="children-select"
             >
               Діти
             </label>
             <i className={`${iconClass} ri-group-line`} />
             <select
-              className="w-full p-2 pl-10 bg-white border border-black-300 rounded-md appearance-none"
+              className="w-full p-3 pl-10 bg-white border border-black-300 rounded-md appearance-none"
               id="children-select"
               value={form.children}
               onChange={(e) =>
@@ -229,7 +244,7 @@ export default function BookingSection() {
 
         {/* Кнопка перевірки */}
         <button
-          className={`w-full font-bold py-3 rounded text-black-900 ${
+          className={`w-full font-semibold py-3 rounded text-black-900 max-w-[300px] ${
             errors.checkInDate || errors.checkOutDate
               ? "bg-yellow-300 cursor-not-allowed"
               : "bg-yellow-600 hover:bg-yellow-700"
