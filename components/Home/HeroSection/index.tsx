@@ -18,8 +18,10 @@ export default function HeroSection() {
         src={imgObj.heroPlaceholder}
       />
       <div className="absolute inset-0 bg-black/50" />
-      <Container className="relative z-10 flex flex-col items-center justify-center h-full text-center gap-[50px] ">
-        <h1 className={title({ color: "yellow", size: "lg", fullWidth: true })}>
+      <Container className="relative z-10 flex flex-col items-center justify-center h-full text-center gap-[35px] md:gap-[90px] ">
+        <h1
+          className={title({ color: "yellow", size: "2xl", fullWidth: true })}
+        >
           В.О.Л.Я.
         </h1>
         <Stats />

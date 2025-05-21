@@ -14,7 +14,7 @@ export default function Stats() {
   return (
     <div className="flex flex-wrap justify-center max-w-[100%] md:max-w-[75%] w-full">
       {statsData.map(({ label, value }, i) => (
-        <div key={i} className="flex flex-col items-center w-[100%] md:w-[33%]">
+        <div key={i} className="flex flex-col items-center w-[100%] md:w-[28%]">
           <CountUp
             className="text-2xl font-bold text-yellow-500"
             decimals={label === "Наш рейтинг" ? 1 : 0}
