@@ -1,69 +1,43 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Готель В.О.Л.Я.",
+  description:
+    "Забронюйте номер у нашому готелі швидко та зручно: виберіть дати, кількість гостей та насолоджуйтеся комфортом і високоякісним сервісом.",
   navItems: [
     {
-      label: "Home",
+      label: "Готель В.О.Л.Я.",
       href: "/",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Ресторан",
+      href: "/restaurant",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
-    },
-    {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
+      label: "Про нас",
       href: "/about",
+    },
+    {
+      label: "Номери",
+      href: "/rooms",
     },
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Готель В.О.Л.Я.",
+      href: "/",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Ресторан",
+      href: "/restaurant",
     },
     {
-      label: "Projects",
-      href: "/projects",
+      label: "Про нас",
+      href: "/about",
     },
     {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
+      label: "Номери",
+      href: "/rooms",
     },
   ],
-  links: {
-    github: "https://github.com/heroui-inc/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
-  },
 };
