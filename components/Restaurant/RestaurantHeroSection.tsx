@@ -22,26 +22,22 @@ const slides = [
 export default function RestaurantHeroSection() {
   return (
     <section className="w-full mt-[64px]">
-      {/* обгортка з явною висотою і позицією */}
       <div className="relative h-[80vh] md:h-[70vh] w-full">
         <Swiper
-          modules={[Autoplay, Pagination]}
           loop
           autoplay={{ delay: 5000, disableOnInteraction: false }}
-          pagination={{ clickable: true }}
           className="h-full"
+          modules={[Autoplay, Pagination]}
+          pagination={{ clickable: true }}
         >
           {slides.map((src) => (
-            <SwiperSlide
-              key={src.src}
-              className="relative w-full h-full" // <-- тут критично!
-            >
+            <SwiperSlide key={src.src} className="relative w-full h-full">
               <Image
-                src={src}
-                alt="Ресторан В.О.Л.Я."
                 fill
                 priority
+                alt="Ресторан В.О.Л.Я."
                 className="object-cover"
+                src={src}
               />
             </SwiperSlide>
           ))}
@@ -55,11 +51,12 @@ export default function RestaurantHeroSection() {
           <h1
             className={title({
               color: "yellow",
-              size: "2xl",
+              size: "xl",
               fullWidth: true,
             })}
           >
-            Ресторан&nbsp;«В.О.Л.Я.»
+            Ресторан <br />
+            «В.О.Л.Я.»
           </h1>
         </Container>
       </div>

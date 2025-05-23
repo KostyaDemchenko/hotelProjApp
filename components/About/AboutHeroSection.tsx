@@ -8,7 +8,7 @@ import "swiper/css/pagination";
 import Image from "next/image";
 
 import Container from "@/components/Container";
-import imgObj from "@/public/images/utils"; // restorant1–5 вже імпортовані
+import imgObj from "@/public/images/utils";
 import { title } from "@/components/primitives";
 
 const slides = [
@@ -24,7 +24,6 @@ const slides = [
 export default function RestaurantHeroSection() {
   return (
     <section className="w-full mt-[64px]">
-      {/* обгортка з явною висотою і позицією */}
       <div className="relative h-[80vh] md:h-[70vh] w-full">
         <Swiper
           loop
@@ -52,7 +51,7 @@ export default function RestaurantHeroSection() {
           <h1
             className={title({
               color: "yellow",
-              size: "2xl",
+              size: "xl",
               fullWidth: true,
             })}
           >

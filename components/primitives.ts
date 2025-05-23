@@ -23,7 +23,7 @@ export const title = tv({
       "2xl": "text-6xl lg:text-8xl",
     },
     fullWidth: {
-      true: "w-full block",
+      true: "w-full block break-normal",
     },
     align: {
       left: "w-full text-left",
