@@ -13,13 +13,13 @@ export default function InfoBlocks() {
       <Container className=" flex flex-col items-center w-full gap-[35px]">
         {/* Блок 1: Ресторан */}
         <article className="flex flex-col w-full md:flex-row items-start justify-between gap-8">
-          <div className="flex-shrink-0 max-w-[450px] w-full h-[300px] relative rounded-md overflow-hidden shadow-lg">
+          <div className="flex-shrink-0 max-w-[100%] md:max-w-[50%] w-full h-[300px] relative rounded-md overflow-hidden shadow-lg">
             <Image
               fill
               priority
               alt="Ресторан при готелі"
               className="object-cover"
-              src={imgObj.restaurant}
+              src={imgObj.restorant1}
             />
           </div>
 
@@ -47,13 +47,13 @@ export default function InfoBlocks() {
 
         {/* Блок 2: Про нас */}
         <article className="flex flex-col w-full md:flex-row-reverse items-start justify-between gap-8">
-          <div className="flex-shrink-0 max-w-[450px] w-full h-[300px] relative rounded-md overflow-hidden shadow-lg">
+          <div className="flex-shrink-0 max-w-[100%] md:max-w-[50%] w-full h-[300px] relative rounded-md overflow-hidden shadow-lg">
             <Image
               fill
               priority
               alt="Про нас"
               className="object-cover"
-              src={imgObj.aboutUs}
+              src={imgObj.about1}
             />
           </div>
 
