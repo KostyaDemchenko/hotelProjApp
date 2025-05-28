@@ -193,7 +193,7 @@ export default function BookingSection() {
             )}
           </div>
 
-          <div className="relative">
+          <div className="relative h-fit">
             <label
               className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="adults-select"
@@ -209,7 +209,7 @@ export default function BookingSection() {
                 setForm((f) => ({ ...f, adults: Number(e.target.value) }))
               }
             >
-              {[1, 2, 3, 4, 5, 6].map((num) => (
+              {[1, 2, 3, 4].map((num) => (
                 <option key={num} value={num}>
                   {num} {num === 1 ? "дорослий" : "дорослих"}
                 </option>
@@ -217,7 +217,7 @@ export default function BookingSection() {
             </select>
           </div>
 
-          <div className="relative">
+          <div className="relative h-fit">
             <label
               className={`${subtitle({ color: "default" })} block mb-2`}
               htmlFor="children-select"
@@ -233,7 +233,7 @@ export default function BookingSection() {
                 setForm((f) => ({ ...f, children: Number(e.target.value) }))
               }
             >
-              {[0, 1, 2, 3, 4].map((num) => (
+              {[0, 1, 2].map((num) => (
                 <option key={num} value={num}>
                   {num} {num === 0 ? "дітей" : num === 1 ? "дитина" : "дитини"}
                 </option>

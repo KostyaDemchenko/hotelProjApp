@@ -24,7 +24,7 @@ export default function Stats({ data = defaultStats, className }: StatsProps) {
   return (
     <div
       className={
-        "flex flex-col items-center justify-center gap-4 md:flex-row" +
+        "flex flex-col items-start justify-center gap-4 md:flex-row" +
         (className || "")
       }
     >
