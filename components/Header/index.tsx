@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +17,7 @@ import {
   ModalBody,
 } from "@heroui/react";
 
+import imgObj from "@/public/images/utils";
 import Container from "@/components/Container";
 
 const MENU = [
@@ -39,7 +41,7 @@ export default function Header() {
             className="text-xl font-bold tracking-tight text-primary"
             href="/"
           >
-            В.О.Л.Я.
+            <Image alt="logo" className="w-12" src={imgObj.logo} />
           </Link>
         </NavbarBrand>
 
