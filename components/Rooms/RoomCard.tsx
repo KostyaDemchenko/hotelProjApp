@@ -1,41 +1,74 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
+import { Card } from "@heroui/card";
+import { Tooltip } from "@heroui/tooltip";
+
 import { urlFor } from "@/lib/sanity";
+import RoomModal from "@/components/Rooms/RoomModal";
 import { Room } from "@/types/sanity";
 
 interface Props {
   room: Room;
+  nights: number;
+  isFree: boolean;
+  tooltip?: string;
 }
 
-export default function RoomCard({ room }: Props) {
-  const photo = room.room_photos?.length
-    ? urlFor(room.room_photos[0]).width(600).height(400).url()
+export default function RoomCard({
+  room,
+  nights,
+  isFree,
+  tooltip = "",
+}: Props) {
+  const [open, setOpen] = useState(false);
+
+  const cover = room.room_photos?.[0]
+    ? urlFor(room.room_photos[0]).width(500).height(340).url()
     : "/placeholder.jpg";
 
-  return (
-    <div className="border rounded-lg shadow-sm overflow-hidden">
+  const total = room.room_price * nights;
+
+  const card = (
+    <Card
+      className={`flex flex-row w-full overflow-hidden ${
+        isFree ? "hover:shadow-lg" : "opacity-50 grayscale cursor-not-allowed"
+      }`}
+      isPressable={isFree}
+      shadow="sm"
+      onPress={isFree ? () => setOpen(true) : undefined}
+    >
       <Image
-        src={photo}
         alt={room.room_name}
-        width={600}
-        height={400}
-        className="object-cover w-full h-[200px]"
+        className="object-cover h-full w-[40%] min-h-[180px]"
+        height={220}
+        src={cover}
+        width={320}
       />
-
-      <div className="p-4 flex flex-col gap-2">
-        <h3 className="text-lg font-semibold">{room.room_name}</h3>
-        <p className="text-gray-600 line-clamp-2">{room.room_description}</p>
-
-        <div className="mt-auto flex items-center justify-between">
-          <span className="text-yellow-600 font-bold">
-            {room.room_price}₴ / ніч
-          </span>
-          <span className="text-sm text-gray-500">
-            {room.room_size} м² · {room.room_beds} ліж.
-          </span>
+      <div className="flex flex-col align-start gap-2 p-4 w-[60%]">
+        <h3 className="font-semibold text-lg text-left">{room.room_name}</h3>
+        <p className="text-muted-foreground text-sm line-clamp-3 flex-1 text-left">
+          {room.room_description}
+        </p>
+        <div className="mt-auto text-yellow-600 font-bold text-left">
+          {total}₴ / {nights} дн.
         </div>
       </div>
-    </div>
+    </Card>
+  );
+
+  return (
+    <>
+      {isFree ? card : <Tooltip content={tooltip}>{card}</Tooltip>}
+      {isFree && (
+        <RoomModal
+          isOpen={open}
+          nights={nights}
+          room={room}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
   );
 }
