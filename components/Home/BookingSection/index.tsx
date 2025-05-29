@@ -12,11 +12,9 @@ import { z } from "zod";
 import Container from "@/components/Container";
 import { title, description } from "@/components/primitives";
 
-/* helpers ----------------------------------------------------------- */
 const toJSDate = (v: CalendarDateTime | null) =>
   v ? v.toDate(getLocalTimeZone()) : null;
 
-/* валідація ---------------------------------------------------------- */
 const bookingSchema = z.object({
   checkInDate: z.date().nullable().refine(Boolean, {
     message: "Будь ласка, оберіть дату заселення",
@@ -171,13 +169,13 @@ export default function BookingSection() {
             <Select
               disallowEmptySelection
               className="w-full"
-              defaultSelectedKeys={[adults[0].key]} // показує «1 дорослий» одразу
+              defaultSelectedKeys={[adults[0].key]}
               label="Дорослі"
               placeholder="Оберіть кількість"
               scrollShadowProps={{ isEnabled: false }}
               startContent={<i className="ri-user-line text-lg" />}
               onSelectionChange={(keys) => {
-                const key = Array.from(keys)[0] as string; // Set -> перший елемент
+                const key = Array.from(keys)[0] as string;
 
                 setForm((f) => ({ ...f, adults: Number(key) }));
               }}
@@ -190,7 +188,7 @@ export default function BookingSection() {
             <Select
               disallowEmptySelection
               className="w-full"
-              defaultSelectedKeys={[kids[0].key]} // показує «0 дітей» одразу
+              defaultSelectedKeys={[kids[0].key]}
               label="Діти"
               placeholder="Оберіть кількість"
               scrollShadowProps={{ isEnabled: false }}

@@ -22,11 +22,11 @@ function getOverlap(room: Room, start: Date, end: Date) {
 }
 
 export default async function RoomsPage({
-  searchParams,
+  params: search,
 }: {
-  searchParams?: Record<string, string>;
+  params?: Record<string, string>;
 }) {
-  const { checkIn, checkOut } = searchParams ?? {};
+  const { checkIn, checkOut } = search ?? {};
   const start = checkIn ? parseISO(checkIn) : null;
   const end = checkOut ? parseISO(checkOut) : null;
   const nights =
