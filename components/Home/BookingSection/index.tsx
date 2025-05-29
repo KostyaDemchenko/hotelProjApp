@@ -1,5 +1,8 @@
 "use client";
 
+import { DatePicker, Select, SelectItem } from "@heroui/react";
+import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
+import { I18nProvider } from "@react-aria/i18n";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -7,32 +10,45 @@ import { uk } from "date-fns/locale";
 import { z } from "zod";
 
 import Container from "@/components/Container";
-import { title, subtitle, description } from "@/components/primitives";
+import { title, description } from "@/components/primitives";
 
+/* helpers ----------------------------------------------------------- */
+const toJSDate = (v: CalendarDateTime | null) =>
+  v ? v.toDate(getLocalTimeZone()) : null;
+
+/* валідація ---------------------------------------------------------- */
 const bookingSchema = z.object({
-  checkInDate: z
-    .date()
-    .nullable()
-    .refine((date) => date !== null, {
-      message: "Будь ласка, оберіть дату заселення",
-    }),
-  checkOutDate: z
-    .date()
-    .nullable()
-    .refine((date) => date !== null, {
-      message: "Будь ласка, оберіть дату виселення",
-    }),
+  checkInDate: z.date().nullable().refine(Boolean, {
+    message: "Будь ласка, оберіть дату заселення",
+  }),
+  checkOutDate: z.date().nullable().refine(Boolean, {
+    message: "Будь ласка, оберіть дату виселення",
+  }),
   adults: z.number().min(1),
   children: z.number().min(0),
 });
 
 type BookingForm = {
-  checkInDate: Date | null;
-  checkOutDate: Date | null;
+  checkInDate: CalendarDateTime | null;
+  checkOutDate: CalendarDateTime | null;
   adults: number;
   children: number;
 };
 
+export const adults = [
+  { key: "1", label: "1 дорослий" },
+  { key: "2", label: "2 дорослих" },
+  { key: "3", label: "3 дорослих" },
+  { key: "4", label: "4 дорослих" },
+];
+
+export const kids = [
+  { key: "0", label: "0 дітей" },
+  { key: "1", label: "1 дитина" },
+  { key: "2", label: "2 дитини" },
+];
+
+/* компонент --------------------------------------------------------- */
 export default function BookingSection() {
   const router = useRouter();
 
@@ -42,13 +58,12 @@ export default function BookingSection() {
     adults: 1,
     children: 0,
   });
-
   const [errors, setErrors] = useState<
     Partial<Record<keyof BookingForm, string>>
   >({});
-
   const [submitted, setSubmitted] = useState(false);
 
+  /* перевірка форми -------------------------------------------------- */
   useEffect(() => {
     if (!submitted) {
       setErrors({});
@@ -56,15 +71,19 @@ export default function BookingSection() {
       return;
     }
 
-    const result = bookingSchema.safeParse(form);
+    const parsed = {
+      ...form,
+      checkInDate: toJSDate(form.checkInDate),
+      checkOutDate: toJSDate(form.checkOutDate),
+    };
+    const result = bookingSchema.safeParse(parsed);
 
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof BookingForm, string>> = {};
 
       result.error.errors.forEach((err) => {
-        if (err.path[0]) {
+        if (err.path[0])
           fieldErrors[err.path[0] as keyof BookingForm] = err.message;
-        }
       });
       setErrors(fieldErrors);
     } else {
@@ -72,19 +91,22 @@ export default function BookingSection() {
     }
   }, [form, submitted]);
 
+  /* сабміт ----------------------------------------------------------- */
   const handleBookingCheck = () => {
     setSubmitted(true);
 
-    const result = bookingSchema.safeParse(form);
+    const parsed = {
+      ...form,
+      checkInDate: toJSDate(form.checkInDate),
+      checkOutDate: toJSDate(form.checkOutDate),
+    };
+    const result = bookingSchema.safeParse(parsed);
 
-    if (!result.success) {
-      // Ошибки показываются через useEffect
-      return;
-    }
+    if (!result.success) return;
 
     const params = new URLSearchParams({
-      checkIn: form.checkInDate!.toISOString(),
-      checkOut: form.checkOutDate!.toISOString(),
+      checkIn: parsed.checkInDate!.toISOString(),
+      checkOut: parsed.checkOutDate!.toISOString(),
       adults: form.adults.toString(),
       children: form.children.toString(),
     });
@@ -92,169 +114,117 @@ export default function BookingSection() {
     router.push(`/rooms?${params.toString()}`);
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return "";
+  const formatDate = (d: CalendarDateTime | null) =>
+    d ? format(toJSDate(d)!, "dd MMMM yyyy", { locale: uk }) : "";
 
-    return format(date, "dd MMMM yyyy", { locale: uk });
-  };
-
-  const iconClass = "absolute left-3 top-[59%]  text-black-500";
-
+  /* UI --------------------------------------------------------------- */
   return (
-    <div className="w-full bg-blue-100 p-6">
-      <Container className="flex flex-col w-full gap-[15px] items-start">
-        <h2
-          className={`${title({ size: "sm", color: "default", align: "center" })}`}
-        >
-          Забронювати номер
-        </h2>
+    <I18nProvider locale="uk-UA">
+      <div className="w-full bg-blue-100 p-6">
+        <Container className="flex flex-col w-full gap-4 items-start">
+          <h2
+            className={title({ size: "sm", color: "default", align: "center" })}
+          >
+            Забронювати номер
+          </h2>
 
-        <div className="grid grid-cols-1 w-full md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 relative">
-          <div className="relative">
-            <label
-              className={`${subtitle({ color: "default" })} block mb-2`}
-              htmlFor="check-in-date"
-            >
-              Дата заселення
-            </label>
-            <input
-              className={`w-full p-3 bg-white border rounded-md ${
-                errors.checkInDate ? "border-red-500" : "border-black-300"
-              }`}
-              id="check-in-date"
-              type="date"
-              value={
-                form.checkInDate ? format(form.checkInDate, "yyyy-MM-dd") : ""
-              }
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  checkInDate: e.target.value ? new Date(e.target.value) : null,
-                }))
-              }
-            />
-            {submitted && errors.checkInDate && (
-              <p
-                className={`${description({ color: "accent", size: "sm" })} mt-1`}
-              >
-                {errors.checkInDate}
-              </p>
-            )}
-            {form.checkInDate && !errors.checkInDate && (
-              <p
-                className={`${description({ color: "default", size: "sm" })} mt-1`}
-              >
-                {formatDate(form.checkInDate)}
-              </p>
-            )}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-6 mb-6">
+            <div>
+              <DatePicker
+                showMonthAndYearPickers
+                isInvalid={Boolean(errors.checkInDate)}
+                label="Дата та час заселення"
+                value={form.checkInDate}
+                onChange={(val) => setForm((f) => ({ ...f, checkInDate: val }))}
+              />
+              {submitted && errors.checkInDate && (
+                <p className={description({ color: "accent", size: "sm" })}>
+                  {errors.checkInDate}
+                </p>
+              )}
+              {form.checkInDate && !errors.checkInDate && (
+                <p className={description({ color: "default", size: "sm" })}>
+                  {formatDate(form.checkInDate)}
+                </p>
+              )}
+            </div>
 
-          <div className="relative">
-            <label
-              className={`${subtitle({ color: "default" })} block mb-2`}
-              htmlFor="check-out-date"
-            >
-              Дата виселення
-            </label>
-            <input
-              className={`w-full p-3 bg-white border rounded-md ${
-                errors.checkOutDate ? "border-red-500" : "border-black-300"
-              }`}
-              id="check-out-date"
-              min={
-                form.checkInDate ? format(form.checkInDate, "yyyy-MM-dd") : ""
-              }
-              type="date"
-              value={
-                form.checkOutDate ? format(form.checkOutDate, "yyyy-MM-dd") : ""
-              }
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  checkOutDate: e.target.value
-                    ? new Date(e.target.value)
-                    : null,
-                }))
-              }
-            />
-            {submitted && errors.checkOutDate && (
-              <p
-                className={`${description({ color: "accent", size: "sm" })} mt-1`}
-              >
-                {errors.checkOutDate}
-              </p>
-            )}
-            {form.checkOutDate && !errors.checkOutDate && (
-              <p
-                className={`${description({ color: "default", size: "sm" })} mt-1`}
-              >
-                {formatDate(form.checkOutDate)}
-              </p>
-            )}
-          </div>
+            <div>
+              <DatePicker
+                showMonthAndYearPickers
+                isInvalid={Boolean(errors.checkOutDate)}
+                label="Дата та час виселення"
+                minValue={form.checkInDate ?? undefined}
+                value={form.checkOutDate}
+                onChange={(val) =>
+                  setForm((f) => ({ ...f, checkOutDate: val }))
+                }
+              />
+              {submitted && errors.checkOutDate && (
+                <p className={description({ color: "accent", size: "sm" })}>
+                  {errors.checkOutDate}
+                </p>
+              )}
+              {form.checkOutDate && !errors.checkOutDate && (
+                <p className={description({ color: "default", size: "sm" })}>
+                  {formatDate(form.checkOutDate)}
+                </p>
+              )}
+            </div>
 
-          <div className="relative h-fit">
-            <label
-              className={`${subtitle({ color: "default" })} block mb-2`}
-              htmlFor="adults-select"
+            <Select
+              disallowEmptySelection
+              className="w-full"
+              defaultSelectedKeys={[adults[0].key]} // показує «1 дорослий» одразу
+              label="Дорослі"
+              placeholder="Оберіть кількість"
+              scrollShadowProps={{ isEnabled: false }}
+              startContent={<i className="ri-user-line text-lg" />}
+              onSelectionChange={(keys) => {
+                const key = Array.from(keys)[0] as string; // Set -> перший елемент
+
+                setForm((f) => ({ ...f, adults: Number(key) }));
+              }}
             >
-              Дорослі
-            </label>
-            <i className={`${iconClass} ri-user-line`} />
-            <select
-              className="w-full p-3 pl-10 bg-white border border-black-300 rounded-md appearance-none"
-              id="adults-select"
-              value={form.adults}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, adults: Number(e.target.value) }))
-              }
-            >
-              {[1, 2, 3, 4].map((num) => (
-                <option key={num} value={num}>
-                  {num} {num === 1 ? "дорослий" : "дорослих"}
-                </option>
+              {adults.map((item) => (
+                <SelectItem key={item.key}>{item.label}</SelectItem>
               ))}
-            </select>
-          </div>
+            </Select>
 
-          <div className="relative h-fit">
-            <label
-              className={`${subtitle({ color: "default" })} block mb-2`}
-              htmlFor="children-select"
+            <Select
+              disallowEmptySelection
+              className="w-full"
+              defaultSelectedKeys={[kids[0].key]} // показує «0 дітей» одразу
+              label="Діти"
+              placeholder="Оберіть кількість"
+              scrollShadowProps={{ isEnabled: false }}
+              startContent={<i className="ri-group-line text-lg" />}
+              onSelectionChange={(keys) => {
+                const key = Array.from(keys)[0] as string;
+
+                setForm((f) => ({ ...f, children: Number(key) }));
+              }}
             >
-              Діти
-            </label>
-            <i className={`${iconClass} ri-group-line`} />
-            <select
-              className="w-full p-3 pl-10 bg-white border border-black-300 rounded-md appearance-none"
-              id="children-select"
-              value={form.children}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, children: Number(e.target.value) }))
-              }
-            >
-              {[0, 1, 2].map((num) => (
-                <option key={num} value={num}>
-                  {num} {num === 0 ? "дітей" : num === 1 ? "дитина" : "дитини"}
-                </option>
+              {kids.map((item) => (
+                <SelectItem key={item.key}>{item.label}</SelectItem>
               ))}
-            </select>
+            </Select>
           </div>
-        </div>
 
-        {/* Кнопка перевірки */}
-        <button
-          className={`w-full font-semibold py-3 rounded text-black-900 max-w-[300px] ${
-            errors.checkInDate || errors.checkOutDate
-              ? "bg-yellow-300 cursor-not-allowed"
-              : "bg-yellow-600 hover:bg-yellow-700"
-          }`}
-          disabled={!!errors.checkInDate || !!errors.checkOutDate}
-          onClick={handleBookingCheck}
-        >
-          Перевірити наявність місць
-        </button>
-      </Container>
-    </div>
+          {/* Кнопка перевірки */}
+          <button
+            className={`w-full max-w-[300px] font-semibold py-3 rounded text-black-900 ${
+              errors.checkInDate || errors.checkOutDate
+                ? "bg-yellow-300 cursor-not-allowed"
+                : "bg-yellow-600 hover:bg-yellow-700"
+            }`}
+            disabled={!!errors.checkInDate || !!errors.checkOutDate}
+            onClick={handleBookingCheck}
+          >
+            Перевірити наявність місць
+          </button>
+        </Container>
+      </div>
+    </I18nProvider>
   );
 }

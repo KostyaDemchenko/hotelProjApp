@@ -2,16 +2,13 @@ import { differenceInCalendarDays, parseISO, format } from "date-fns";
 import { uk } from "date-fns/locale";
 
 import Container from "@/components/Container";
+import BookingFilters from "@/components/Rooms/BookingFilters";
 import RoomCard from "@/components/Rooms/RoomCard";
 import { roomsQuery } from "@/lib/queries";
 import { sanity } from "@/lib/sanity";
 import { Room } from "@/types/sanity";
 
-function getOverlap(
-  room: Room,
-  start: Date,
-  end: Date
-): { from: Date; to: Date } | null {
+function getOverlap(room: Room, start: Date, end: Date) {
   const ranges = room.room_unavailable_ranges ?? [];
 
   for (const r of ranges) {
@@ -39,6 +36,8 @@ export default async function RoomsPage({
 
   return (
     <Container className="mt-[64px] py-16 flex flex-col gap-8 min-h-[85dvh]">
+      <BookingFilters />
+
       {rooms.map((room) => {
         let isFree = true;
         let tooltip = "";
@@ -48,10 +47,9 @@ export default async function RoomsPage({
 
           if (overlap) {
             isFree = false;
-            tooltip = `Зайнятий з ${format(overlap.from, "dd MMM yyyy", {
-              locale: uk,
-            })} по ${format(overlap.to, "dd MMM yyyy", { locale: uk })}. 
-Доступний з ${format(overlap.to, "dd MMM yyyy", { locale: uk })}`;
+            tooltip = `Зайнятий з ${format(overlap.from, "dd MMM yyyy", { locale: uk })}
+                       по ${format(overlap.to, "dd MMM yyyy", { locale: uk })}.
+                       Доступний з ${format(overlap.to, "dd MMM yyyy", { locale: uk })}`;
           }
         }
 

@@ -6,7 +6,7 @@ export interface RoomAddition {
 
 export interface RoomUnavailableRange {
   _key: string;
-  from: string; // YYYY-MM-DD
+  from: string;
   to: string;
 }
 
