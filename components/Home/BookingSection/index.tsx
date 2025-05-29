@@ -48,7 +48,6 @@ export const kids = [
   { key: "2", label: "2 дитини" },
 ];
 
-/* компонент --------------------------------------------------------- */
 export default function BookingSection() {
   const router = useRouter();
 
@@ -63,7 +62,6 @@ export default function BookingSection() {
   >({});
   const [submitted, setSubmitted] = useState(false);
 
-  /* перевірка форми -------------------------------------------------- */
   useEffect(() => {
     if (!submitted) {
       setErrors({});
@@ -91,7 +89,6 @@ export default function BookingSection() {
     }
   }, [form, submitted]);
 
-  /* сабміт ----------------------------------------------------------- */
   const handleBookingCheck = () => {
     setSubmitted(true);
 
@@ -117,7 +114,6 @@ export default function BookingSection() {
   const formatDate = (d: CalendarDateTime | null) =>
     d ? format(toJSDate(d)!, "dd MMMM yyyy", { locale: uk }) : "";
 
-  /* UI --------------------------------------------------------------- */
   return (
     <I18nProvider locale="uk-UA">
       <div className="w-full bg-blue-100 p-6">
@@ -211,7 +207,6 @@ export default function BookingSection() {
             </Select>
           </div>
 
-          {/* Кнопка перевірки */}
           <button
             className={`w-full max-w-[300px] font-semibold py-3 rounded text-black-900 ${
               errors.checkInDate || errors.checkOutDate
