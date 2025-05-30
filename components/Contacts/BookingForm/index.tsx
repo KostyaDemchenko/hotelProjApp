@@ -9,12 +9,12 @@ import {
   Button,
 } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
-import { parseISO, format as fmt } from "date-fns";
+import { parseISO, differenceInCalendarDays, format as fmt } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { z } from "zod";
 
-/* ── константи дорослі / діти ─────────────────────── */
+/* ── дорослі / діти ─────────────────────────────── */
 const ADULTS = [
   { key: "1", label: "1 дорослий" },
   { key: "2", label: "2 дорослих" },
@@ -27,7 +27,7 @@ const KIDS = [
   { key: "2", label: "2 дитини" },
 ];
 
-/* ── схема валідації ─────────────────────────────── */
+/* ── схема ──────────────────────────────────────── */
 const phoneRe = /^\+?[0-9\s\-]{7,15}$/;
 const schema = z.object({
   name: z.string().min(2),
@@ -43,41 +43,53 @@ const schema = z.object({
   }),
 });
 
-/* ── Date → CalendarDateTime (локальна дата, без UTC-зсуву) ── */
+/* ── Date → CalendarDateTime (локально) ─────────── */
 const toCDT = (d: Date | null) =>
   d
     ? new CalendarDateTime(d.getFullYear(), d.getMonth() + 1, d.getDate(), 0, 0)
     : null;
 
-/* ─────────────────────────────────────────────────── */
+/* ── допоміжна: ночі між датами ─────────────────── */
+const nightsBetween = (
+  a: CalendarDateTime | null,
+  b: CalendarDateTime | null
+) => {
+  if (!a || !b) return 1;
+  const d1 = a.toDate(getLocalTimeZone());
+  const d2 = b.toDate(getLocalTimeZone());
+
+  return Math.max(1, differenceInCalendarDays(d2, d1));
+};
 
 export default function BookingForm() {
   const search = useSearchParams();
   const nav = useRouter();
 
-  /* ---------- список номерів (підтягуємо один раз) ---------- */
-  type RoomOpt = { key: string; label: string; price?: number };
+  /* ---------- список номерів ---------- */
+  type RoomOpt = { key: string; label: string; base: number };
   const [rooms, setRooms] = useState<RoomOpt[]>([]);
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/rooms-list");
-      const { rooms } = (await res.json()) as {
-        rooms: { _id: string; room_name: string; room_price?: number }[];
+      /* переконайтеся, що API-роут повертає room_price */
+      const { rooms } = (await fetch("/api/rooms-list").then((r) =>
+        r.json()
+      )) as {
+        rooms: { _id: string; room_name: string; room_price: number }[];
       };
 
       setRooms(
         rooms.map((r) => ({
           key: r._id,
           label: r.room_name,
-          price: r.room_price ?? 0,
+          base: r.room_price,
         }))
       );
     })();
   }, []);
 
-  /* ---------- initial state з query-string ---------- */
-  const [form, set] = useState({
+  /* ---------- state ---------- */
+  const [form, setForm] = useState({
     name: "",
     phone: "",
     checkIn: toCDT(
@@ -92,20 +104,18 @@ export default function BookingForm() {
     price: Number(search.get("price") ?? 0),
     agree: false,
   });
-
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
-  /* ---------- коли обираємо номер обновлюємо ціну (якщо є) ---------- */
-  const handleRoomSelect = (id: string) => {
-    const found = rooms.find((r) => r.key === id);
+  /* ---------- перерахунок вартості ---------- */
+  useEffect(() => {
+    const room = rooms.find((r) => r.key === form.roomId);
 
-    set((f) => ({
-      ...f,
-      roomId: id,
-      price: found?.price ?? f.price,
-    }));
-  };
+    if (!room) return;
+    const nights = nightsBetween(form.checkIn, form.checkOut);
+
+    setForm((f) => ({ ...f, price: room.base * nights }));
+  }, [form.roomId, form.checkIn, form.checkOut, rooms]);
 
   /* ---------- submit ---------- */
   const submit = async () => {
@@ -116,21 +126,19 @@ export default function BookingForm() {
       checkIn: form.checkIn?.toDate(getLocalTimeZone()),
       checkOut: form.checkOut?.toDate(getLocalTimeZone()),
     };
-
     const v = schema.safeParse(data);
 
     if (!v.success) {
-      const map: Record<string, string> = {};
+      const m: Record<string, string> = {};
 
-      v.error.errors.forEach((e) => (map[e.path[0] as string] = e.message));
-      setErr(map);
+      v.error.errors.forEach((e) => (m[e.path[0] as string] = e.message));
+      setErr(m);
 
       return;
     }
     setErr({});
     setBusy(true);
 
-    /* — відправляємо на свій API-route /api/book-room — */
     const res = await fetch("/api/book-room", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -163,8 +171,19 @@ export default function BookingForm() {
 
       return;
     }
-
     nav.replace("/thank-you");
+  };
+
+  const handleRoomSelect = (id: string) => {
+    const found = rooms.find((r) => r.key === id);
+
+    setForm((f) => ({
+      ...f,
+      roomId: id,
+      price: found
+        ? found.base * nightsBetween(f.checkIn, f.checkOut)
+        : f.price,
+    }));
   };
 
   /* ---------- UI ---------- */
@@ -175,16 +194,15 @@ export default function BookingForm() {
         isInvalid={!!err.name}
         label="Ім’я"
         value={form.name}
-        onValueChange={(v) => set((f) => ({ ...f, name: v }))}
+        onValueChange={(v) => setForm((f) => ({ ...f, name: v }))}
       />
-
       <Input
         errorMessage={err.phone}
         isInvalid={!!err.phone}
         label="Контактний номер"
         placeholder="+38 (0__) ___-__-__"
         value={form.phone}
-        onValueChange={(v) => set((f) => ({ ...f, phone: v }))}
+        onValueChange={(v) => setForm((f) => ({ ...f, phone: v }))}
       />
 
       <DatePicker
@@ -192,7 +210,7 @@ export default function BookingForm() {
         isInvalid={!!err.checkIn}
         label="Дата заїзду"
         value={form.checkIn}
-        onChange={(v) => set((f) => ({ ...f, checkIn: v }))}
+        onChange={(v) => setForm((f) => ({ ...f, checkIn: v }))}
       />
       <DatePicker
         granularity="day"
@@ -200,14 +218,14 @@ export default function BookingForm() {
         label="Дата виїзду"
         minValue={form.checkIn ?? undefined}
         value={form.checkOut}
-        onChange={(v) => set((f) => ({ ...f, checkOut: v }))}
+        onChange={(v) => setForm((f) => ({ ...f, checkOut: v }))}
       />
 
       <Select
         label="Дорослі"
         selectedKeys={new Set([form.adults])}
         onSelectionChange={(k) =>
-          set((f) => ({ ...f, adults: Array.from(k)[0] as string }))
+          setForm((f) => ({ ...f, adults: Array.from(k)[0] as string }))
         }
       >
         {ADULTS.map((o) => (
@@ -219,7 +237,7 @@ export default function BookingForm() {
         label="Діти"
         selectedKeys={new Set([form.children])}
         onSelectionChange={(k) =>
-          set((f) => ({ ...f, children: Array.from(k)[0] as string }))
+          setForm((f) => ({ ...f, children: Array.from(k)[0] as string }))
         }
       >
         {KIDS.map((o) => (
@@ -248,7 +266,7 @@ export default function BookingForm() {
       <Checkbox
         isInvalid={!!err.agree}
         isSelected={form.agree}
-        onValueChange={(v) => set((f) => ({ ...f, agree: v }))}
+        onValueChange={(v) => setForm((f) => ({ ...f, agree: v }))}
       >
         Я погоджуюсь з умовами користування
       </Checkbox>
