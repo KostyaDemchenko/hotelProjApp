@@ -1,13 +1,25 @@
 import { createClient } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 
-const config = {
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  apiVersion: "2025-05-29",
-  useCdn: process.env.NODE_ENV === "production",
-  token: process.env.SANITY_API_DEVELOPER_TOKEN,
-};
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!;
+const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET!;
 
-export const sanity = createClient(config);
-export const urlFor = (src: any) => imageUrlBuilder(config).image(src);
+/* 🔒 серверний: із token */
+export const sanityClient = createClient({
+  projectId,
+  dataset,
+  apiVersion: "2024-12-01", // дата ≤ сьогодні
+  token: process.env.SANITY_API_DEVELOPER_TOKEN,
+  useCdn: false,
+});
+
+/* 🌐 браузерний: без token, лише для urlFor() */
+export const sanityReadClient = createClient({
+  projectId,
+  dataset,
+  apiVersion: "2024-12-01",
+  useCdn: true,
+});
+
+export const urlFor = (src: any) =>
+  imageUrlBuilder({ projectId, dataset }).image(src);

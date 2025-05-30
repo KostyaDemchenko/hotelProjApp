@@ -4,7 +4,7 @@ import { DatePicker, Select, SelectItem } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { parseISO } from "date-fns";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { title } from "@/components/primitives";
 
@@ -14,7 +14,6 @@ export const adults = [
   { key: "3", label: "3 дорослих" },
   { key: "4", label: "4 дорослих" },
 ];
-
 export const kids = [
   { key: "0", label: "0 дітей" },
   { key: "1", label: "1 дитина" },
@@ -37,23 +36,19 @@ export default function BookingFilters() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const initCheckIn = toCDT(
+  const initIn = toCDT(
     search.get("checkIn") ? parseISO(search.get("checkIn")!) : null
   );
-  const initCheckOut = toCDT(
+  const initOut = toCDT(
     search.get("checkOut") ? parseISO(search.get("checkOut")!) : null
   );
-  const initAdults = search.get("adults") ?? adults[0].key;
-  const initChildren = search.get("children") ?? kids[0].key;
+  const [checkIn, setIn] = useState<CalendarDateTime | null>(initIn);
+  const [checkOut, setOut] = useState<CalendarDateTime | null>(initOut);
+  const [adultKey, setAdults] = useState(search.get("adults") ?? adults[0].key);
+  const [kidKey, setKids] = useState(search.get("children") ?? kids[0].key);
 
-  const [checkIn, setCheckIn] = useState<CalendarDateTime | null>(initCheckIn);
-  const [checkOut, setCheckOut] = useState<CalendarDateTime | null>(
-    initCheckOut
-  );
-  const [adultKey, setAdultKey] = useState(initAdults);
-  const [kidsKey, setKidsKey] = useState(initChildren);
-
-  const push = () => {
+  /* запис у URL кожного разу, коли щось змінилось */
+  useEffect(() => {
     const sp = new URLSearchParams();
 
     if (checkIn)
@@ -61,9 +56,9 @@ export default function BookingFilters() {
     if (checkOut)
       sp.set("checkOut", checkOut.toDate(getLocalTimeZone()).toISOString());
     sp.set("adults", adultKey);
-    sp.set("children", kidsKey);
-    router.push(`${pathname}?${sp.toString()}`);
-  };
+    sp.set("children", kidKey);
+    router.replace(`${pathname}?${sp.toString()}`);
+  }, [checkIn, checkOut, adultKey, kidKey, pathname, router]);
 
   return (
     <section>
@@ -73,61 +68,41 @@ export default function BookingFilters() {
         <DatePicker
           showMonthAndYearPickers
           granularity="day"
-          label="Дата та час заселення"
+          label="Дата заселення"
           value={checkIn}
-          onChange={setCheckIn}
+          onChange={setIn}
         />
-
         <DatePicker
           showMonthAndYearPickers
           granularity="day"
-          label="Дата та час виселення"
+          label="Дата виселення"
           minValue={checkIn ?? undefined}
           value={checkOut}
-          onChange={setCheckOut}
+          onChange={setOut}
         />
 
         <Select
-          disallowEmptySelection
-          defaultSelectedKeys={[adultKey]}
           label="Дорослі"
-          placeholder="Оберіть кількість"
+          selectedKeys={new Set([adultKey])}
           startContent={<i className="ri-user-line text-lg" />}
-          onSelectionChange={(keys) => {
-            const key = Array.from(keys)[0] as string;
-
-            setAdultKey(key);
-          }}
+          onSelectionChange={(k) => setAdults(Array.from(k)[0] as string)}
         >
-          {adults.map((item) => (
-            <SelectItem key={item.key}>{item.label}</SelectItem>
+          {adults.map((a) => (
+            <SelectItem key={a.key}>{a.label}</SelectItem>
           ))}
         </Select>
 
         <Select
-          disallowEmptySelection
-          defaultSelectedKeys={[kidsKey]}
           label="Діти"
-          placeholder="Оберіть кількість"
+          selectedKeys={new Set([kidKey])}
           startContent={<i className="ri-group-line text-lg" />}
-          onSelectionChange={(keys) => {
-            const key = Array.from(keys)[0] as string;
-
-            setKidsKey(key);
-          }}
+          onSelectionChange={(k) => setKids(Array.from(k)[0] as string)}
         >
-          {kids.map((item) => (
-            <SelectItem key={item.key}>{item.label}</SelectItem>
+          {kids.map((k) => (
+            <SelectItem key={k.key}>{k.label}</SelectItem>
           ))}
         </Select>
       </div>
-
-      <button
-        className="mt-6 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-black-900 rounded font-semibold"
-        onClick={push}
-      >
-        Застосувати
-      </button>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Tooltip } from "@heroui/tooltip";
+import { useSearchParams } from "next/navigation";
 
 import { urlFor } from "@/lib/sanity";
 import { Room } from "@/types/sanity";
@@ -22,18 +23,19 @@ export default function RoomCard({
   isFree,
   tooltip = "",
 }: Props) {
-  /* ── ціна й картинка ──────────────────────────── */
   const cover = room.room_photos?.[0]
     ? urlFor(room.room_photos[0]).width(500).height(340).url()
     : "/placeholder.jpg";
   const total = room.room_price * nights;
 
-  /* ── формуємо URL /contacts з поточними query ── */
-  const qs = typeof window === "undefined" ? "" : window.location.search;
+  const search = useSearchParams();
+  const qs = search.toString() ? `?${search}` : "";
   const delim = qs ? "&" : "?";
-  const bookUrl = `/contacts${qs}${delim}room=${room._id}&price=${total}`;
+  const bookUrl =
+    `/contacts${qs}${delim}room=${room._id}` +
+    `&roomName=${encodeURIComponent(room.room_name)}` +
+    `&price=${room.room_price * nights}`;
 
-  /* ── сама картка ──────────────────────────────── */
   const card = (
     <Card
       className={`flex md:flex-row w-full overflow-hidden ${

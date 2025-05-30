@@ -5,7 +5,7 @@ import Container from "@/components/Container";
 import BookingFilters from "@/components/Rooms/BookingFilters";
 import RoomCard from "@/components/Rooms/RoomCard";
 import { roomsQuery } from "@/lib/queries";
-import { sanity } from "@/lib/sanity";
+import { sanityClient } from "@/lib/sanity";
 import { Room } from "@/types/sanity";
 
 function getOverlap(room: Room, start: Date, end: Date) {
@@ -32,7 +32,7 @@ export default async function RoomsPage({
   const nights =
     start && end ? Math.max(1, differenceInCalendarDays(end, start)) : 1;
 
-  const rooms: Room[] = await sanity.fetch(roomsQuery);
+  const rooms: Room[] = await sanityClient.fetch(roomsQuery);
 
   return (
     <Container className="mt-[64px] py-8 md:py-16 flex flex-col gap-8 min-h-[85dvh]">
