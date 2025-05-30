@@ -20,10 +20,10 @@ export default function AboutPage() {
       <AboutHeroSection />
 
       <Stats
-        className="bg-gray-500 py-[25px]"
+        className=" bg-gray-500 py-[25px]"
         data={[
           { label: "Років досвіду", value: 12 },
-          { label: "Співробітників у команді", value: 30 },
+          { label: "Співробітників у команді", value: 60 },
           { label: "Реалізованих проєктів", value: 75 },
         ]}
       />

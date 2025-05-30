@@ -8,7 +8,7 @@ import "swiper/css/pagination";
 import Image from "next/image";
 
 import Container from "@/components/Container";
-import imgObj from "@/public/images/utils"; // restorant1–5 вже імпортовані
+import imgObj from "@/public/images/utils";
 import { title } from "@/components/primitives";
 
 const slides = [

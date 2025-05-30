@@ -23,7 +23,7 @@ export default function RestaurantPage() {
       <Stats
         className=" bg-gray-500 py-[25px]"
         data={[
-          { label: "Місць у залі", value: 120 },
+          { label: "Місць у залі", value: 48 },
           { label: "Авторських страв", value: 64 },
           { label: "Рейтинг гостей", value: "4.9 / 5" },
         ]}

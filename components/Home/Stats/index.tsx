@@ -15,7 +15,7 @@ interface StatsProps {
 }
 
 const defaultStats: StatItem[] = [
-  { label: "Лет успішних на ринку", value: 15 },
+  { label: "Років успішних на ринку", value: 15 },
   { label: "Задоволених клієнтів", value: 3412 },
   { label: "Наш рейтинг", value: 4.8 },
 ];
