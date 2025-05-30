@@ -10,11 +10,11 @@ import {
 } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { parseISO, format as fmt } from "date-fns";
+import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import { z } from "zod";
 
-/* ▼ варіанти селекторів */
+/* ── константи дорослі / діти ─────────────────────── */
 const ADULTS = [
   { key: "1", label: "1 дорослий" },
   { key: "2", label: "2 дорослих" },
@@ -27,7 +27,7 @@ const KIDS = [
   { key: "2", label: "2 дитини" },
 ];
 
-/* ▼ схемa */
+/* ── схема валідації ─────────────────────────────── */
 const phoneRe = /^\+?[0-9\s\-]{7,15}$/;
 const schema = z.object({
   name: z.string().min(2),
@@ -36,39 +36,76 @@ const schema = z.object({
   checkOut: z.date(),
   adults: z.number().min(1),
   children: z.number().min(0),
-  roomId: z.string(),
+  roomId: z.string().min(1, "Оберіть номер"),
   price: z.number().positive(),
   agree: z.literal(true, {
     errorMap: () => ({ message: "Погодьтесь з умовами" }),
   }),
 });
 
-/* ▼ util Date→CalendarDateTime (локально, без UTC-зсуву) */
+/* ── Date → CalendarDateTime (локальна дата, без UTC-зсуву) ── */
 const toCDT = (d: Date | null) =>
   d
     ? new CalendarDateTime(d.getFullYear(), d.getMonth() + 1, d.getDate(), 0, 0)
     : null;
 
+/* ─────────────────────────────────────────────────── */
+
 export default function BookingForm() {
-  const sp = useSearchParams();
+  const search = useSearchParams();
   const nav = useRouter();
 
-  /* initial state з URL */
+  /* ---------- список номерів (підтягуємо один раз) ---------- */
+  type RoomOpt = { key: string; label: string; price?: number };
+  const [rooms, setRooms] = useState<RoomOpt[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/rooms-list");
+      const { rooms } = (await res.json()) as {
+        rooms: { _id: string; room_name: string; room_price?: number }[];
+      };
+
+      setRooms(
+        rooms.map((r) => ({
+          key: r._id,
+          label: r.room_name,
+          price: r.room_price ?? 0,
+        }))
+      );
+    })();
+  }, []);
+
+  /* ---------- initial state з query-string ---------- */
   const [form, set] = useState({
     name: "",
     phone: "",
-    checkIn: toCDT(sp.get("checkIn") ? parseISO(sp.get("checkIn")!) : null),
-    checkOut: toCDT(sp.get("checkOut") ? parseISO(sp.get("checkOut")!) : null),
-    adults: sp.get("adults") ?? "1",
-    children: sp.get("children") ?? "0",
-    roomId: sp.get("room") ?? "",
-    roomName: sp.get("roomName") ?? sp.get("room") ?? "",
-    price: Number(sp.get("price") ?? 0),
+    checkIn: toCDT(
+      search.get("checkIn") ? parseISO(search.get("checkIn")!) : null
+    ),
+    checkOut: toCDT(
+      search.get("checkOut") ? parseISO(search.get("checkOut")!) : null
+    ),
+    adults: search.get("adults") ?? "1",
+    children: search.get("children") ?? "0",
+    roomId: search.get("room") ?? "",
+    price: Number(search.get("price") ?? 0),
     agree: false,
   });
 
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+
+  /* ---------- коли обираємо номер обновлюємо ціну (якщо є) ---------- */
+  const handleRoomSelect = (id: string) => {
+    const found = rooms.find((r) => r.key === id);
+
+    set((f) => ({
+      ...f,
+      roomId: id,
+      price: found?.price ?? f.price,
+    }));
+  };
 
   /* ---------- submit ---------- */
   const submit = async () => {
@@ -83,63 +120,51 @@ export default function BookingForm() {
     const v = schema.safeParse(data);
 
     if (!v.success) {
-      const m: Record<string, string> = {};
+      const map: Record<string, string> = {};
 
-      v.error.errors.forEach((e) => (m[e.path[0] as string] = e.message));
-      setErr(m);
+      v.error.errors.forEach((e) => (map[e.path[0] as string] = e.message));
+      setErr(map);
+
+      return;
+    }
+    setErr({});
+    setBusy(true);
+
+    /* — відправляємо на свій API-route /api/book-room — */
+    const res = await fetch("/api/book-room", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roomId: form.roomId,
+        from: fmt(v.data.checkIn, "yyyy-MM-dd"),
+        to: fmt(v.data.checkOut, "yyyy-MM-dd"),
+        payload: {
+          user_name: form.name,
+          user_phone: form.phone,
+          rent_from: fmt(v.data.checkIn, "yyyy-MM-dd"),
+          rent_to: fmt(v.data.checkOut, "yyyy-MM-dd"),
+          rent_price: form.price,
+          people_count: v.data.adults,
+          child_count: v.data.children,
+        },
+      }),
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      setErr({ general: json.error ?? "Помилка бронювання" });
+      setBusy(false);
+
+      return;
+    }
+    if (json.overlap) {
+      setErr({ checkIn: "Номер зайнятий у ці дати" });
+      setBusy(false);
 
       return;
     }
 
-    setErr({});
-    setBusy(true);
-
-    try {
-      // Подготавливаем payload для API
-      const payload = {
-        user_name: form.name,
-        user_phone: form.phone,
-        rent_from: fmt(v.data.checkIn, "yyyy-MM-dd"),
-        rent_to: fmt(v.data.checkOut, "yyyy-MM-dd"),
-        rent_price: form.price,
-        people_count: v.data.adults,
-        child_count: v.data.children,
-      };
-
-      // Отправляем запрос к API route
-      const response = await fetch("/api/book-room", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          roomId: form.roomId,
-          from: fmt(v.data.checkIn, "yyyy-MM-dd"),
-          to: fmt(v.data.checkOut, "yyyy-MM-dd"),
-          payload,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Booking failed");
-      }
-
-      if (result.overlap) {
-        setErr({ checkIn: "Номер зайнятий у ці дати" });
-        setBusy(false);
-
-        return;
-      }
-
-      // Успешное бронирование
-      nav.replace("/thank-you");
-    } catch (error) {
-      console.error("Booking error:", error);
-      setErr({ general: "Помилка при бронюванні. Спробуйте ще раз." });
-      setBusy(false);
-    }
+    nav.replace("/thank-you");
   };
 
   /* ---------- UI ---------- */
@@ -202,8 +227,23 @@ export default function BookingForm() {
         ))}
       </Select>
 
-      <Input isReadOnly label="Номер" value={form.roomName} />
-      <Input isReadOnly label="Вартість, грн" value={String(form.price)} />
+      <Select
+        isInvalid={!!err.roomId}
+        label="Номер"
+        placeholder="Оберіть номер"
+        selectedKeys={new Set([form.roomId])}
+        onSelectionChange={(k) => handleRoomSelect(Array.from(k)[0] as string)}
+      >
+        {rooms.map((r) => (
+          <SelectItem key={r.key}>{r.label}</SelectItem>
+        ))}
+      </Select>
+
+      <Input
+        isReadOnly
+        label="Вартість, грн"
+        value={form.price ? String(form.price) : "—"}
+      />
 
       <Checkbox
         isInvalid={!!err.agree}
@@ -212,6 +252,8 @@ export default function BookingForm() {
       >
         Я погоджуюсь з умовами користування
       </Checkbox>
+
+      {err.general && <p className="text-sm text-red-500">{err.general}</p>}
 
       <Button color="primary" isLoading={busy} onPress={submit}>
         Підтвердити бронювання
