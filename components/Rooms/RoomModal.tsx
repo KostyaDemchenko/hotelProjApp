@@ -7,8 +7,9 @@ import {
   ModalBody,
   ModalFooter,
 } from "@heroui/modal";
-import { Button } from "@heroui/button";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@heroui/button";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -27,6 +28,9 @@ interface Props {
 export default function RoomModal({ room, nights, isOpen, onClose }: Props) {
   const photos = room.room_photos ?? [];
   const total = room.room_price * nights;
+
+  const base = typeof window === "undefined" ? "" : window.location.search;
+  const bookUrl = `/contacts${base}&room=${room._id}&price=${total}`;
 
   return (
     <Modal
@@ -105,18 +109,21 @@ export default function RoomModal({ room, nights, isOpen, onClose }: Props) {
                 Ліжка: <b>{room.room_beds}</b>
               </span>
               <span>
-                Гостей: <b>{room.room_max_people}</b>
+                До <b>{room.room_max_people}</b> гостей
               </span>
               <span>
-                Дітей: <b>{room.room_max_child}</b>
+                До <b>{room.room_max_child}</b> діте1
               </span>
             </div>
           </div>
         </ModalBody>
 
         <ModalFooter>
-          <Button color="primary" onPress={onClose}>
+          <Button color="secondary" onPress={onClose}>
             Закрити
+          </Button>
+          <Button color="primary" onPress={onClose}>
+            <Link href={bookUrl}>Забронювати</Link>
           </Button>
         </ModalFooter>
       </ModalContent>

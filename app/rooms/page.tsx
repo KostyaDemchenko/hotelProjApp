@@ -35,7 +35,7 @@ export default async function RoomsPage({
   const rooms: Room[] = await sanity.fetch(roomsQuery);
 
   return (
-    <Container className="mt-[64px] py-16 flex flex-col gap-8 min-h-[85dvh]">
+    <Container className="mt-[64px] py-8 md:py-16 flex flex-col gap-8 min-h-[85dvh]">
       <BookingFilters />
 
       {rooms.map((room) => {
