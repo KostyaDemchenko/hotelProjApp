@@ -25,7 +25,7 @@ const MENU = [
   { href: "/rooms", label: "Номери", icon: "ri-hotel-bed-line" },
   { href: "/restaurant", label: "Ресторан", icon: "ri-restaurant-2-line" },
   { href: "/about", label: "Про нас", icon: "ri-information-line" },
-  { href: "/contacts", label: "Контакти", icon: "ri-contacts-book-line" },
+  { href: "/contacts", label: "Бронюваня", icon: "ri-contacts-book-line" },
 ];
 
 export default function Header() {
