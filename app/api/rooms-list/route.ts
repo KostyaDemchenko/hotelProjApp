@@ -1,3 +1,4 @@
+//запрос на получение всех номеров для нашей формы
 import { NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 

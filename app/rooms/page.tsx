@@ -1,4 +1,5 @@
-import { differenceInCalendarDays, parseISO } from "date-fns";
+import { differenceInCalendarDays, parseISO, format } from "date-fns";
+import { uk } from "date-fns/locale";
 
 import Container from "@/components/Container";
 import BookingFilters from "@/components/Rooms/BookingFilters";
@@ -7,11 +8,6 @@ import { roomsQuery } from "@/lib/queries";
 import { sanityClient } from "@/lib/sanity";
 import { Room } from "@/types/sanity";
 
-/* тип, що відповідає новому PageProps */
-interface RoomsPageProps {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
 function getOverlap(room: Room, start: Date, end: Date) {
   const ranges = room.room_unavailable_ranges ?? [];
 
@@ -19,18 +15,17 @@ function getOverlap(room: Room, start: Date, end: Date) {
     const f = parseISO(r.from);
     const t = parseISO(r.to);
 
-    if (t > start && f < end) return true;
+    if (t > start && f < end) return { from: f, to: t };
   }
 
-  return false;
+  return null;
 }
 
-export default async function RoomsPage({ searchParams }: RoomsPageProps) {
-  const qs = (searchParams && (await searchParams)) || {};
-
-  const checkIn = typeof qs.checkIn === "string" ? qs.checkIn : undefined;
-  const checkOut = typeof qs.checkOut === "string" ? qs.checkOut : undefined;
-
+export default async function RoomsPage(props: {
+  searchParams?: Promise<Record<string, string>>;
+}) {
+  const query = await props.searchParams;
+  const { checkIn, checkOut } = query ?? {};
   const start = checkIn ? parseISO(checkIn) : null;
   const end = checkOut ? parseISO(checkOut) : null;
   const nights =
@@ -39,19 +34,31 @@ export default async function RoomsPage({ searchParams }: RoomsPageProps) {
   const rooms: Room[] = await sanityClient.fetch(roomsQuery);
 
   return (
-    <Container className="mt-[64px] py-16 flex flex-col gap-8 min-h-[85dvh]">
+    <Container className="mt-[64px] py-8 md:py-16 flex flex-col gap-8 min-h-[85dvh]">
       <BookingFilters />
 
       {rooms.map((room) => {
-        const busy = start && end ? getOverlap(room, start, end) : false;
+        let isFree = true;
+        let tooltip = "";
+
+        if (start && end) {
+          const overlap = getOverlap(room, start, end);
+
+          if (overlap) {
+            isFree = false;
+            tooltip = `Зайнятий з ${format(overlap.from, "dd MMM yyyy", { locale: uk })}
+                       по ${format(overlap.to, "dd MMM yyyy", { locale: uk })}.
+                       Доступний з ${format(overlap.to, "dd MMM yyyy", { locale: uk })}`;
+          }
+        }
 
         return (
           <RoomCard
             key={room._id}
-            isFree={!busy}
+            isFree={isFree}
             nights={nights}
             room={room}
-            tooltip={busy ? "Номер зайнятий у вибрані дати" : ""}
+            tooltip={tooltip}
           />
         );
       })}

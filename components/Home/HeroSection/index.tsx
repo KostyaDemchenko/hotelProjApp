@@ -22,7 +22,7 @@ export default function HeroSection() {
         <h1
           className={title({ color: "yellow", size: "2xl", fullWidth: true })}
         >
-          В.О.Л.Я.
+          В[/\]Я
         </h1>
         <Stats />
       </Container>

@@ -1,3 +1,4 @@
+//запрос на получение номеров и их характеристик
 import { groq } from "next-sanity";
 
 export const roomsQuery = groq`

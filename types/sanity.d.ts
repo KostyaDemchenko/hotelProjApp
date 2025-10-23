@@ -1,3 +1,4 @@
+//типизация всех наших переменных из таблиц
 export interface RoomAddition {
   _key: string;
   title: string;

@@ -8,6 +8,7 @@ import { Tooltip } from "@heroui/tooltip";
 import { useSearchParams } from "next/navigation";
 
 import { urlFor } from "@/lib/sanity";
+import { calculateFinalPrice } from "@/lib/pricing";
 import { Room } from "@/types/sanity";
 
 interface Props {
@@ -26,15 +27,29 @@ export default function RoomCard({
   const cover = room.room_photos?.[0]
     ? urlFor(room.room_photos[0]).width(500).height(340).url()
     : "/placeholder.jpg";
-  const total = room.room_price * nights;
 
   const search = useSearchParams();
+  const checkIn = search.get("checkIn");
+  const checkOut = search.get("checkOut");
+
+  // Рассчитываем цену с учетом сезонности и скидок
+  let total = room.room_price * nights; // fallback
+
+  if (checkIn && checkOut) {
+    total = calculateFinalPrice(
+      room.room_price,
+      new Date(checkIn),
+      new Date(checkOut),
+      nights
+    );
+  }
+
   const qs = search.toString() ? `?${search}` : "";
   const delim = qs ? "&" : "?";
   const bookUrl =
     `/contacts${qs}${delim}room=${room._id}` +
     `&roomName=${encodeURIComponent(room.room_name)}` +
-    `&price=${room.room_price * nights}`;
+    `&price=${total}`;
 
   const card = (
     <Card

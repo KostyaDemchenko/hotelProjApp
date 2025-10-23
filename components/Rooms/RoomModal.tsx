@@ -16,6 +16,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import { urlFor } from "@/lib/sanity";
+import { calculateFinalPrice } from "@/lib/pricing";
 import { Room } from "@/types/sanity";
 
 interface Props {
@@ -27,7 +28,24 @@ interface Props {
 
 export default function RoomModal({ room, nights, isOpen, onClose }: Props) {
   const photos = room.room_photos ?? [];
-  const total = room.room_price * nights;
+
+  // Рассчитываем цену с учетом сезонности и скидок
+  let total = room.room_price * nights; // fallback
+
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    const checkIn = params.get("checkIn");
+    const checkOut = params.get("checkOut");
+
+    if (checkIn && checkOut) {
+      total = calculateFinalPrice(
+        room.room_price,
+        new Date(checkIn),
+        new Date(checkOut),
+        nights
+      );
+    }
+  }
 
   const base = typeof window === "undefined" ? "" : window.location.search;
   const bookUrl = `/contacts${base}&room=${room._id}&price=${total}`;

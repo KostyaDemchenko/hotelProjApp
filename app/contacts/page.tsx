@@ -1,16 +1,12 @@
 import { Suspense } from "react";
 
-import Container from "@/components/Container";
 import BookingForm from "@/components/Contacts/BookingForm";
-
-export const dynamic = "force-dynamic";
+import Container from "@/components/Container";
 
 export default function ContactsPage() {
   return (
-    <Container className="py-12">
-      <Suspense
-        fallback={<p className="text-center py-24">Завантаження форми…</p>}
-      >
+    <Container>
+      <Suspense fallback={<div>Завантаження...</div>}>
         <BookingForm />
       </Suspense>
     </Container>
