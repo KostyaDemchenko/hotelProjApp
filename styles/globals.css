@@ -12,3 +12,160 @@
     scrollbar-width: none;
   }
 }
+
+/* Стилизация календаря для отображения сезонных цен */
+@layer components {
+  /* Высокий сезон: май (месяц 5) - сентябрь (месяц 9) */
+  .seasonal-calendar [data-slot="grid-body"] td {
+    position: relative;
+  }
+
+  /* Подсветка высокого сезона (май-сентябрь) желтым */
+  .seasonal-calendar [data-slot="grid-body"] td button[data-focus-visible] {
+    @apply ring-yellow-400;
+  }
+
+  /* Добавляем индикатор сезона */
+  .seasonal-calendar [data-slot="grid-body"] td button::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: transparent;
+  }
+
+  /* Визуально отмечаем высокий сезон */
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="May"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="June"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="July"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="August"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="September"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="травня"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="червня"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="липня"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="серпня"]::after,
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="вересня"]::after {
+    background-color: #fbbf24; /* желтый для высокого сезона */
+  }
+
+  /* Фон для ячеек высокого сезона */
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="May"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="June"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="July"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="August"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="September"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="травня"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="червня"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="липня"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="серпня"]:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="вересня"]:not([data-disabled]) {
+    background-color: rgba(254, 240, 138, 0.2); /* светло-желтый фон */
+  }
+
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="May"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="June"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="July"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="August"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="September"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="травня"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="червня"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="липня"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="серпня"]:hover:not([data-disabled]),
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[aria-label*="вересня"]:hover:not([data-disabled]) {
+    background-color: rgba(254, 240, 138, 0.4); /* более яркий при hover */
+  }
+}

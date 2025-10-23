@@ -64,9 +64,29 @@ export default function BookingFilters() {
     <section>
       <h2 className={title({ size: "sm", color: "default" })}>Фільтри</h2>
 
+      {/* Легенда сезонных цен */}
+      <div className="mt-2 mb-4 flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-yellow-200 border border-yellow-400" />
+          <span className="text-gray-700">
+            Високий сезон (травень-вересень) +15%
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-blue-100 border border-blue-300" />
+          <span className="text-gray-700">
+            Низький сезон (жовтень-квітень) звичайна ціна
+          </span>
+        </div>
+      </div>
+
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <DatePicker
           showMonthAndYearPickers
+          classNames={{
+            calendar: "seasonal-calendar",
+          }}
+          description="Травень-вересень: високий сезон (+15%)"
           granularity="day"
           label="Дата заселення"
           value={checkIn}
@@ -74,6 +94,10 @@ export default function BookingFilters() {
         />
         <DatePicker
           showMonthAndYearPickers
+          classNames={{
+            calendar: "seasonal-calendar",
+          }}
+          description="Від 3 днів: знижка від 5%"
           granularity="day"
           label="Дата виселення"
           minValue={checkIn ?? undefined}

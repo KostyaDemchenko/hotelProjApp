@@ -126,6 +126,10 @@ export default function BookingSection() {
             <div>
               <DatePicker
                 showMonthAndYearPickers
+                classNames={{
+                  calendar: "seasonal-calendar",
+                }}
+                description="Травень-вересень: +15%"
                 isInvalid={Boolean(errors.checkInDate)}
                 label="Дата та час заселення"
                 value={form.checkInDate}
@@ -146,6 +150,10 @@ export default function BookingSection() {
             <div>
               <DatePicker
                 showMonthAndYearPickers
+                classNames={{
+                  calendar: "seasonal-calendar",
+                }}
+                description="Від 3 днів: знижка від 5%"
                 isInvalid={Boolean(errors.checkOutDate)}
                 label="Дата та час виселення"
                 minValue={form.checkInDate ?? undefined}

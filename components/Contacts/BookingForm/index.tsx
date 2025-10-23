@@ -100,11 +100,17 @@ export default function BookingForm() {
 
   /* ---------- автоматический пересчет цены при изменении дат или номера ---------- */
   useEffect(() => {
-    if (!form.roomId || !form.checkIn || !form.checkOut) return;
+    // Проверяем что все нужные данные есть
+    if (!form.roomId || !form.checkIn || !form.checkOut || rooms.length === 0) {
+      return;
+    }
 
+    // Ищем комнату в списке
     const found = rooms.find((r) => r.key === form.roomId);
 
-    if (!found || !found.price) return;
+    if (!found || !found.price) {
+      return;
+    }
 
     const checkInDate = form.checkIn.toDate(getLocalTimeZone());
     const checkOutDate = form.checkOut.toDate(getLocalTimeZone());
@@ -212,6 +218,10 @@ export default function BookingForm() {
       />
 
       <DatePicker
+        classNames={{
+          calendar: "seasonal-calendar",
+        }}
+        description="Травень-вересень: високий сезон (+15%)"
         granularity="day"
         isInvalid={!!err.checkIn}
         label="Дата заїзду"
@@ -219,6 +229,10 @@ export default function BookingForm() {
         onChange={(v) => set((f) => ({ ...f, checkIn: v }))}
       />
       <DatePicker
+        classNames={{
+          calendar: "seasonal-calendar",
+        }}
+        description="Від 3 днів: знижка від 5%"
         granularity="day"
         isInvalid={!!err.checkOut}
         label="Дата виїзду"
