@@ -168,4 +168,163 @@
     button[aria-label*="вересня"]:hover:not([data-disabled]) {
     background-color: rgba(254, 240, 138, 0.4); /* более яркий при hover */
   }
+
+  /* Стили для недоступных дат (полностью забронированные) */
+  .seasonal-calendar [data-slot="grid-body"] td button[data-unavailable="true"] {
+    background-color: #fecaca; /* red-200 */
+    color: #991b1b; /* red-800 */
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button[data-unavailable="true"]:hover {
+    background-color: #fca5a5; /* red-300 */
+  }
+
+  /* Стили для высокого сезона */
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button:not([data-unavailable="true"]):not([data-selected="true"])
+    [aria-label*="May"],
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button:not([data-unavailable="true"]):not([data-selected="true"])
+    [aria-label*="June"],
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button:not([data-unavailable="true"]):not([data-selected="true"])
+    [aria-label*="July"],
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button:not([data-unavailable="true"]):not([data-selected="true"])
+    [aria-label*="August"],
+  .seasonal-calendar
+    [data-slot="grid-body"]
+    td
+    button:not([data-unavailable="true"]):not([data-selected="true"])
+    [aria-label*="September"] {
+    background-color: #fef3c7; /* yellow-200 */
+  }
+
+  /* ===== Кастомный календарь с react-day-picker ===== */
+  .custom-calendar-wrapper {
+    @apply rounded-lg border border-gray-200 p-4 bg-white shadow-sm;
+  }
+
+  .custom-calendar-wrapper .rdp-custom {
+    @apply w-full;
+  }
+
+  /* Полностью забронированные даты */
+  .custom-calendar-wrapper .fully-booked-day button {
+    @apply bg-red-300 text-red-900 cursor-not-allowed pointer-events-none rounded-md relative;
+    text-decoration: line-through;
+  }
+
+  .custom-calendar-wrapper .fully-booked-day:hover button {
+    @apply bg-red-300;
+  }
+
+  /* Додатковий індикатор */
+  .custom-calendar-wrapper .fully-booked-day button::after {
+    content: "🚫";
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    font-size: 8px;
+    line-height: 1;
+  }
+
+  /* Высокий сезон */
+  .custom-calendar-wrapper .high-season-day button {
+    @apply bg-yellow-200 text-gray-900 rounded-md;
+  }
+
+  .custom-calendar-wrapper .high-season-day:not(.rdp-day_disabled):hover button {
+    @apply bg-yellow-300 rounded-md;
+  }
+
+  /* Обычные дни */
+  .custom-calendar-wrapper .rdp-day:not(.rdp-day_disabled):not(.high-season-day):not(.fully-booked-day) button {
+    @apply rounded-md;
+  }
+
+  .custom-calendar-wrapper .rdp-day:not(.rdp-day_disabled):not(.high-season-day):not(.fully-booked-day):hover button {
+    @apply bg-blue-50 rounded-md;
+  }
+
+  /* Выбранная дата */
+  .custom-calendar-wrapper .rdp-day_selected button {
+    @apply bg-blue-600 text-white font-semibold rounded-md;
+  }
+
+  /* Сегодняшняя дата */
+  .custom-calendar-wrapper .rdp-day_today:not(.rdp-day_selected) .rdp-day_content {
+    @apply border-2 border-blue-600;
+  }
+
+  /* Отключенные даты */
+  .custom-calendar-wrapper .rdp-day_disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* Кнопка дня */
+  .custom-calendar-wrapper .rdp-day {
+    @apply p-1;
+  }
+
+  .custom-calendar-wrapper .rdp-button {
+    @apply w-10 h-10;
+  }
+
+  /* Заголовок месяца */
+  .custom-calendar-wrapper .rdp-caption {
+    @apply mb-4;
+  }
+
+  .custom-calendar-wrapper .rdp-caption_label {
+    @apply text-lg font-semibold text-gray-900;
+  }
+
+  /* Навигационные кнопки */
+  .custom-calendar-wrapper .rdp-nav_button {
+    @apply w-8 h-8 rounded-md hover:bg-gray-100 transition-colors;
+  }
+
+  /* Дни недели */
+  .custom-calendar-wrapper .rdp-head_cell {
+    @apply text-sm font-medium text-gray-600;
+  }
+
+  /* ===== Компактний режим для форм ===== */
+  .custom-calendar-wrapper.compact-mode {
+    @apply p-2 border-0 shadow-none;
+  }
+
+  .custom-calendar-wrapper.compact-mode .rdp-button {
+    @apply w-8 h-8 text-sm;
+  }
+
+  .custom-calendar-wrapper.compact-mode .rdp-caption {
+    @apply mb-2;
+  }
+
+  .custom-calendar-wrapper.compact-mode .rdp-caption_label {
+    @apply text-base;
+  }
+
+  .custom-calendar-wrapper.compact-mode .rdp-nav_button {
+    @apply w-7 h-7;
+  }
+
+  .custom-calendar-wrapper.compact-mode .calendar-legend {
+    @apply mt-2 gap-2 text-xs;
+  }
 }

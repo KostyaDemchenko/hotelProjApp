@@ -1,14 +1,13 @@
 "use client";
 
-import { DatePicker, Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { I18nProvider } from "@react-aria/i18n";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-import { uk } from "date-fns/locale";
 import { z } from "zod";
 
+import CustomDatePicker from "@/components/CustomDatePicker";
 import Container from "@/components/Container";
 import { title, description } from "@/components/primitives";
 
@@ -109,9 +108,6 @@ export default function BookingSection() {
     router.push(`/rooms?${params.toString()}`);
   };
 
-  const formatDate = (d: CalendarDateTime | null) =>
-    d ? format(toJSDate(d)!, "dd MMMM yyyy", { locale: uk }) : "";
-
   return (
     <I18nProvider locale="uk-UA">
       <div className="w-full bg-blue-100 p-6">
@@ -124,38 +120,47 @@ export default function BookingSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 w-full gap-6 mb-6">
             <div>
-              <DatePicker
-                showMonthAndYearPickers
-                classNames={{
-                  calendar: "seasonal-calendar",
-                }}
+              <CustomDatePicker
                 description="Травень-вересень: +15%"
                 isInvalid={Boolean(errors.checkInDate)}
-                label="Дата та час заселення"
+                label="Дата заселення"
                 value={form.checkInDate}
-                onChange={(val) => setForm((f) => ({ ...f, checkInDate: val }))}
+                onChange={(val) => {
+                  setForm((f) => {
+                    // Якщо нова дата заселення >= дати виселення, скидаємо дату виселення
+                    if (val && f.checkOutDate) {
+                      const checkInDate = new Date(
+                        val.year,
+                        val.month - 1,
+                        val.day
+                      );
+                      const checkOutDate = new Date(
+                        f.checkOutDate.year,
+                        f.checkOutDate.month - 1,
+                        f.checkOutDate.day
+                      );
+
+                      if (checkInDate >= checkOutDate) {
+                        return { ...f, checkInDate: val, checkOutDate: null };
+                      }
+                    }
+
+                    return { ...f, checkInDate: val };
+                  });
+                }}
               />
               {submitted && errors.checkInDate && (
                 <p className={description({ color: "accent", size: "sm" })}>
                   {errors.checkInDate}
                 </p>
               )}
-              {form.checkInDate && !errors.checkInDate && (
-                <p className={description({ color: "default", size: "sm" })}>
-                  {formatDate(form.checkInDate)}
-                </p>
-              )}
             </div>
 
             <div>
-              <DatePicker
-                showMonthAndYearPickers
-                classNames={{
-                  calendar: "seasonal-calendar",
-                }}
+              <CustomDatePicker
                 description="Від 3 днів: знижка від 5%"
                 isInvalid={Boolean(errors.checkOutDate)}
-                label="Дата та час виселення"
+                label="Дата виселення"
                 minValue={form.checkInDate ?? undefined}
                 value={form.checkOutDate}
                 onChange={(val) =>
@@ -165,11 +170,6 @@ export default function BookingSection() {
               {submitted && errors.checkOutDate && (
                 <p className={description({ color: "accent", size: "sm" })}>
                   {errors.checkOutDate}
-                </p>
-              )}
-              {form.checkOutDate && !errors.checkOutDate && (
-                <p className={description({ color: "default", size: "sm" })}>
-                  {formatDate(form.checkOutDate)}
                 </p>
               )}
             </div>

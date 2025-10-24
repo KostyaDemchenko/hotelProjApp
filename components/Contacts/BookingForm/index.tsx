@@ -1,19 +1,13 @@
 "use client";
 
-import {
-  Input,
-  DatePicker,
-  Select,
-  SelectItem,
-  Checkbox,
-  Button,
-} from "@heroui/react";
+import { Input, Select, SelectItem, Checkbox, Button } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { parseISO, format as fmt, differenceInCalendarDays } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { z } from "zod";
 
+import CustomDatePicker from "@/components/CustomDatePicker";
 import { calculateFinalPrice } from "@/lib/pricing";
 
 /* ── константи дорослі / діти ─────────────────────── */
@@ -217,23 +211,33 @@ export default function BookingForm() {
         onValueChange={(v) => set((f) => ({ ...f, phone: v }))}
       />
 
-      <DatePicker
-        classNames={{
-          calendar: "seasonal-calendar",
-        }}
+      <CustomDatePicker
         description="Травень-вересень: високий сезон (+15%)"
-        granularity="day"
         isInvalid={!!err.checkIn}
         label="Дата заїзду"
         value={form.checkIn}
-        onChange={(v) => set((f) => ({ ...f, checkIn: v }))}
+        onChange={(v) =>
+          set((f) => {
+            // Якщо нова дата заїзду >= дати виїзду, скидаємо
+            if (v && f.checkOut) {
+              const checkInDate = new Date(v.year, v.month - 1, v.day);
+              const checkOutDate = new Date(
+                f.checkOut.year,
+                f.checkOut.month - 1,
+                f.checkOut.day
+              );
+
+              if (checkInDate >= checkOutDate) {
+                return { ...f, checkIn: v, checkOut: null };
+              }
+            }
+
+            return { ...f, checkIn: v };
+          })
+        }
       />
-      <DatePicker
-        classNames={{
-          calendar: "seasonal-calendar",
-        }}
+      <CustomDatePicker
         description="Від 3 днів: знижка від 5%"
-        granularity="day"
         isInvalid={!!err.checkOut}
         label="Дата виїзду"
         minValue={form.checkIn ?? undefined}

@@ -1,11 +1,12 @@
 "use client";
 
-import { DatePicker, Select, SelectItem } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { parseISO } from "date-fns";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
+import CustomDatePicker from "@/components/CustomDatePicker";
 import { title } from "@/components/primitives";
 
 export const adults = [
@@ -64,41 +65,30 @@ export default function BookingFilters() {
     <section>
       <h2 className={title({ size: "sm", color: "default" })}>Фільтри</h2>
 
-      {/* Легенда сезонных цен */}
-      <div className="mt-2 mb-4 flex flex-wrap gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-yellow-200 border border-yellow-400" />
-          <span className="text-gray-700">
-            Високий сезон (травень-вересень) +15%
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-blue-100 border border-blue-300" />
-          <span className="text-gray-700">
-            Низький сезон (жовтень-квітень) звичайна ціна
-          </span>
-        </div>
-      </div>
-
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <DatePicker
-          showMonthAndYearPickers
-          classNames={{
-            calendar: "seasonal-calendar",
-          }}
+        <CustomDatePicker
           description="Травень-вересень: високий сезон (+15%)"
-          granularity="day"
           label="Дата заселення"
           value={checkIn}
-          onChange={setIn}
-        />
-        <DatePicker
-          showMonthAndYearPickers
-          classNames={{
-            calendar: "seasonal-calendar",
+          onChange={(val) => {
+            setIn(val);
+            // Якщо нова дата заселення >= дати виселення, скидаємо
+            if (val && checkOut) {
+              const checkInDate = new Date(val.year, val.month - 1, val.day);
+              const checkOutDate = new Date(
+                checkOut.year,
+                checkOut.month - 1,
+                checkOut.day
+              );
+
+              if (checkInDate >= checkOutDate) {
+                setOut(null);
+              }
+            }
           }}
+        />
+        <CustomDatePicker
           description="Від 3 днів: знижка від 5%"
-          granularity="day"
           label="Дата виселення"
           minValue={checkIn ?? undefined}
           value={checkOut}
