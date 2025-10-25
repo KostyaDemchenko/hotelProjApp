@@ -33,12 +33,6 @@ export default async function RoomsPage(props: {
 
   const rooms: Room[] = await sanityClient.fetch(roomsQuery);
 
-  console.log(
-    "📥 [Sanity] Отримані дані з Sanity:",
-    JSON.stringify(rooms, null, 2)
-  );
-  console.log("📊 [Sanity] Кількість номерів:", rooms.length);
-
   return (
     <Container className="mt-[64px] py-8 md:py-16 flex flex-col gap-8 min-h-[85dvh]">
       <BookingFilters />
@@ -57,15 +51,6 @@ export default async function RoomsPage(props: {
                        Доступний з ${format(overlap.to, "dd MMM yyyy", { locale: uk })}`;
           }
         }
-
-        console.log("🏨 [Відображення] Номер:", {
-          id: room._id,
-          name: room.room_name,
-          price: room.room_price,
-          isFree,
-          nights,
-          unavailableRanges: room.room_unavailable_ranges,
-        });
 
         return (
           <RoomCard
