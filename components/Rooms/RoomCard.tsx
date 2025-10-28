@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
 import { Tooltip } from "@heroui/tooltip";
 import { useSearchParams } from "next/navigation";
+import { Users, Baby, Bed, Maximize } from "lucide-react";
 
 import { urlFor } from "@/lib/sanity";
 import { calculateFinalPrice } from "@/lib/pricing";
@@ -45,16 +46,14 @@ export default function RoomCard({
   }
 
   const qs = search.toString() ? `?${search}` : "";
-  const delim = qs ? "&" : "?";
-  const bookUrl =
-    `/contacts${qs}${delim}room=${room._id}` +
-    `&roomName=${encodeURIComponent(room.room_name)}` +
-    `&price=${total}`;
+  const roomDetailUrl = `/rooms/${room._id}${qs}`;
 
-  const card = (
+  const cardContent = (
     <Card
-      className={`flex md:flex-row w-full overflow-hidden ${
-        isFree ? "hover:shadow-lg" : "opacity-50 grayscale cursor-not-allowed"
+      className={`flex md:flex-row w-full overflow-hidden transition-transform ${
+        isFree
+          ? "hover:shadow-lg hover:scale-[1.01] cursor-pointer"
+          : "opacity-50 grayscale cursor-not-allowed"
       }`}
       shadow="sm"
     >
@@ -69,24 +68,72 @@ export default function RoomCard({
       <div className="flex flex-col gap-2 p-4 w-full md:w-[60%]">
         <h3 className="font-semibold text-lg">{room.room_name}</h3>
 
-        <p className="text-muted-foreground text-sm line-clamp-5 md:line-clamp-3 overflow-y-scroll flex-1">
+        <p className="text-muted-foreground text-sm line-clamp-2 md:line-clamp-2">
           {room.room_description}
         </p>
+
+        {/* Информация о номере */}
+        <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+          <div className="flex items-center gap-1">
+            <Maximize className="w-4 h-4" />
+            <span>{room.room_size} м²</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Bed className="w-4 h-4" />
+            <span>
+              {room.room_beds} {room.room_beds === 1 ? "кровать" : "кровати"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="w-4 h-4" />
+            <span>до {room.room_max_people} гостей</span>
+          </div>
+          {room.room_max_child > 0 && (
+            <div className="flex items-center gap-1">
+              <Baby className="w-4 h-4" />
+              <span>до {room.room_max_child} детей</span>
+            </div>
+          )}
+        </div>
+
+        {/* Удобства */}
+        {room.room_additions && room.room_additions.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {room.room_additions.slice(0, 4).map((addition) => (
+              <span
+                key={addition._key}
+                className="text-xs bg-gray-100 px-2 py-1 rounded-full flex items-center gap-1"
+              >
+                <i className={`${addition.icon}`} />
+                <span>{addition.title}</span>
+              </span>
+            ))}
+            {room.room_additions.length > 4 && (
+              <span className="text-xs text-gray-500 px-2 py-1">
+                +{room.room_additions.length - 4} еще
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="mt-auto text-yellow-600 font-bold">
           {total}₴ / {nights} дн.
         </div>
 
         {isFree && (
-          <Link passHref className="mt-2" href={bookUrl}>
+          <div className="mt-2">
             <Button color="primary">
-              <span>Забронювати</span>
+              <span>Детальніше</span>
             </Button>
-          </Link>
+          </div>
         )}
       </div>
     </Card>
   );
 
-  return isFree ? card : <Tooltip content={tooltip}>{card}</Tooltip>;
+  if (!isFree) {
+    return <Tooltip content={tooltip}>{cardContent}</Tooltip>;
+  }
+
+  return <Link href={roomDetailUrl}>{cardContent}</Link>;
 }
