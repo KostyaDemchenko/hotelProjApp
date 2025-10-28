@@ -1,0 +1,70 @@
+// пост запрос на отправку данных из формы в бд таблица бронироввания
+import { NextResponse } from "next/server";
+import { parseISO } from "date-fns";
+
+import { sanityClient } from "@/lib/sanity";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { roomId, from, to, payload } = body;
+
+    if (!roomId || !from || !to) {
+      return NextResponse.json({ error: "Bad data" }, { status: 400 });
+    }
+
+    /* ①  перевіряємо зайнятість */
+
+    const ranges = (await sanityClient.fetch(
+      `*[_type=="room" && _id==$id][0].room_unavailable_ranges[]{from,to}`,
+      { id: roomId }
+    )) as { from: string; to: string }[] | null;
+
+    const overlap =
+      ranges?.some((r) => {
+        const f = parseISO(r.from);
+        const t = parseISO(r.to);
+
+        return t > new Date(from) && f < new Date(to);
+      }) ?? false;
+
+    if (overlap) {
+      return NextResponse.json({ overlap: true }, { status: 200 });
+    }
+
+    /* ②  створюємо документ booking */
+
+    const doc = await sanityClient.create({
+      _type: "booking",
+      user_name: payload.user_name,
+      user_phone: payload.user_phone,
+      rent_from: payload.rent_from,
+      rent_to: payload.rent_to,
+      rent_price: payload.rent_price,
+      people_count: payload.people_count,
+      child_count: payload.child_count,
+      payment_type: payload.payment_type || "cash",
+      payment_status: payload.payment_status || "unpaid",
+      room: { _type: "reference", _ref: roomId },
+      status: "pending",
+    });
+
+    return NextResponse.json({ overlap: false, id: doc._id }, { status: 201 });
+  } catch (e) {
+    if (e instanceof Error) {
+      return NextResponse.json(
+        {
+          error: "Server error",
+          details: e.message,
+          stack: process.env.NODE_ENV === "development" ? e.stack : undefined,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Unknown server error" },
+      { status: 500 }
+    );
+  }
+}
