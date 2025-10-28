@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Select, SelectItem, Checkbox, Button } from "@heroui/react";
+import { Input, Select, SelectItem, Checkbox, Button, RadioGroup, Radio } from "@heroui/react";
 import { CalendarDateTime, getLocalTimeZone } from "@internationalized/date";
 import { parseISO, format as fmt, differenceInCalendarDays } from "date-fns";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import CustomDatePicker from "@/components/CustomDatePicker";
 import { calculateFinalPrice } from "@/lib/pricing";
+import PaymentModal from "./PaymentModal";
 
 /* ── константи дорослі / діти ─────────────────────── */
 const ADULTS = [
@@ -34,6 +35,9 @@ const schema = z.object({
   children: z.number().min(0),
   roomId: z.string().min(1, "Оберіть номер"),
   price: z.number().positive(),
+  paymentType: z.enum(["cash", "online"], {
+    errorMap: () => ({ message: "Оберіть тип оплати" }),
+  }),
   agree: z.literal(true, {
     errorMap: () => ({ message: "Погодьтесь з умовами" }),
   }),
@@ -86,11 +90,14 @@ export default function BookingForm() {
     children: search.get("children") ?? "0",
     roomId: search.get("room") ?? "",
     price: Number(search.get("price") ?? 0),
+    paymentType: "cash" as "cash" | "online",
     agree: false,
   });
 
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<"unpaid" | "paid">("unpaid");
 
   /* ---------- автоматический пересчет цены при изменении дат или номера ---------- */
   useEffect(() => {
@@ -152,6 +159,20 @@ export default function BookingForm() {
       return;
     }
     setErr({});
+
+    // Якщо онлайн оплата - показуємо модалку
+    if (form.paymentType === "online") {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    // Для готівки статус завжди unpaid
+    setPaymentStatus("unpaid");
+    await sendBooking(v.data, "unpaid");
+  };
+
+  /* ---------- відправка бронювання ---------- */
+  const sendBooking = async (data: any, paymentStat: "unpaid" | "paid") => {
     setBusy(true);
 
     /* — відправляємо на свій API-route /api/book-room — */
@@ -160,16 +181,18 @@ export default function BookingForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         roomId: form.roomId,
-        from: fmt(v.data.checkIn, "yyyy-MM-dd"),
-        to: fmt(v.data.checkOut, "yyyy-MM-dd"),
+        from: fmt(data.checkIn, "yyyy-MM-dd"),
+        to: fmt(data.checkOut, "yyyy-MM-dd"),
         payload: {
           user_name: form.name,
           user_phone: form.phone,
-          rent_from: fmt(v.data.checkIn, "yyyy-MM-dd"),
-          rent_to: fmt(v.data.checkOut, "yyyy-MM-dd"),
+          rent_from: fmt(data.checkIn, "yyyy-MM-dd"),
+          rent_to: fmt(data.checkOut, "yyyy-MM-dd"),
           rent_price: form.price,
-          people_count: v.data.adults,
-          child_count: v.data.children,
+          people_count: data.adults,
+          child_count: data.children,
+          payment_type: form.paymentType,
+          payment_status: paymentStat,
         },
       }),
     });
@@ -287,6 +310,19 @@ export default function BookingForm() {
         value={form.price ? String(form.price) : "—"}
       />
 
+      <RadioGroup
+        label="Тип оплати"
+        value={form.paymentType}
+        onValueChange={(v) => set((f) => ({ ...f, paymentType: v as "cash" | "online" }))}
+      >
+        <Radio value="cash">
+          Готівка (розрахунок на місці)
+        </Radio>
+        <Radio value="online">
+          Онлайн оплата
+        </Radio>
+      </RadioGroup>
+
       <Checkbox
         isInvalid={!!err.agree}
         isSelected={form.agree}
@@ -300,6 +336,24 @@ export default function BookingForm() {
       <Button color="primary" isLoading={busy} onPress={submit}>
         Підтвердити бронювання
       </Button>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={form.price}
+        onPaymentComplete={async (isPaid) => {
+          const data = {
+            ...form,
+            adults: Number(form.adults),
+            children: Number(form.children),
+            checkIn: form.checkIn?.toDate(getLocalTimeZone()),
+            checkOut: form.checkOut?.toDate(getLocalTimeZone()),
+          };
+          const status = isPaid ? "paid" : "unpaid";
+          setPaymentStatus(status);
+          await sendBooking(data, status);
+        }}
+      />
     </div>
   );
 }

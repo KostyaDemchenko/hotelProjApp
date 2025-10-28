@@ -36,7 +36,15 @@ export async function POST(req: Request) {
 
     const doc = await sanityClient.create({
       _type: "booking",
-      ...payload,
+      user_name: payload.user_name,
+      user_phone: payload.user_phone,
+      rent_from: payload.rent_from,
+      rent_to: payload.rent_to,
+      rent_price: payload.rent_price,
+      people_count: payload.people_count,
+      child_count: payload.child_count,
+      payment_type: payload.payment_type || "cash",
+      payment_status: payload.payment_status || "unpaid",
       room: { _type: "reference", _ref: roomId },
       status: "pending",
     });
