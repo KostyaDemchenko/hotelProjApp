@@ -5,7 +5,7 @@ import { DayPicker } from "react-day-picker";
 import { uk } from "date-fns/locale";
 
 import "react-day-picker/dist/style.css";
-import { getDateType } from "@/lib/calendar-utils";
+import { getDateType, isRestaurantDiscountDay } from "@/lib/calendar-utils";
 
 interface CustomCalendarProps {
   selected?: Date | null;
@@ -99,6 +99,9 @@ export default function CustomCalendar({
         ) === "high-season"
       );
     },
+    restaurantDiscount: (date: Date) => {
+      return isRestaurantDiscountDay(date);
+    },
   };
 
   const disabledDays = [
@@ -120,6 +123,7 @@ export default function CustomCalendar({
         modifiersClassNames={{
           fullyBooked: "fully-booked-day",
           highSeason: "high-season-day",
+          restaurantDiscount: "restaurant-discount-day",
           selected: "rdp-day_selected",
           today: "rdp-day_today",
           disabled: "rdp-day_disabled",
@@ -144,6 +148,10 @@ export default function CustomCalendar({
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-yellow-200" />
           <span className="text-gray-700">Високий сезон +15%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-blue-200" />
+          <span className="text-gray-700">Знижка 50% на меню в ресторані</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-white border border-gray-300" />

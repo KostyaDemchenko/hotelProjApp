@@ -16,6 +16,7 @@ function checkRateLimit(ip: string): boolean {
 
   if (!limit || now > limit.resetTime) {
     rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 }); // 1 хвилина
+
     return true;
   }
 
@@ -25,6 +26,7 @@ function checkRateLimit(ip: string): boolean {
   }
 
   limit.count++;
+
   return true;
 }
 
@@ -70,6 +72,7 @@ function sanitizeString(str: string): string {
         "'": "&#x27;",
         "&": "&amp;",
       };
+
       return entities[char] || char;
     })
     .trim();

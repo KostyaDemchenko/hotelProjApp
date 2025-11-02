@@ -53,6 +53,23 @@ export function isFullyBooked(
 }
 
 /**
+ * Перевіряє, чи є день днем зі знижкою в ресторані
+ * Перший вівторок, середа та четвер кожного місяця
+ */
+export function isRestaurantDiscountDay(date: Date): boolean {
+  const dayOfWeek = date.getDay(); // 0 (неділя) - 6 (субота)
+  const dayOfMonth = date.getDate();
+
+  // Перевіряємо, чи це вівторок (2), середа (3) або четвер (4)
+  const isCorrectDayOfWeek = dayOfWeek >= 2 && dayOfWeek <= 4;
+
+  // Перевіряємо, чи це перший такий день місяця (дата від 1 до 7)
+  const isFirstWeek = dayOfMonth >= 1 && dayOfMonth <= 7;
+
+  return isCorrectDayOfWeek && isFirstWeek;
+}
+
+/**
  * Определяет тип даты для стилизации календаря
  * @returns 'fully-booked' | 'high-season' | 'normal'
  */

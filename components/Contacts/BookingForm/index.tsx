@@ -15,9 +15,10 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { z } from "zod";
 
+import PaymentModal from "./PaymentModal";
+
 import CustomDatePicker from "@/components/CustomDatePicker";
 import { calculateFinalPrice } from "@/lib/pricing";
-import PaymentModal from "./PaymentModal";
 
 /* ── константи дорослі / діти ─────────────────────── */
 const ADULTS = [
@@ -174,6 +175,7 @@ export default function BookingForm() {
     // Якщо онлайн оплата - показуємо модалку
     if (form.paymentType === "online") {
       setShowPaymentModal(true);
+
       return;
     }
 
@@ -272,6 +274,7 @@ export default function BookingForm() {
 
           // Форматуємо: +38 (0XX) XXX-XX-XX
           let formatted = "";
+
           if (cleaned.length > 0) {
             formatted = "+" + cleaned.slice(0, 2); // +38
           }
@@ -394,9 +397,9 @@ export default function BookingForm() {
       </Button>
 
       <PaymentModal
+        amount={form.price}
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        amount={form.price}
         onPaymentComplete={async (isPaid) => {
           const data = {
             ...form,
@@ -406,6 +409,7 @@ export default function BookingForm() {
             checkOut: form.checkOut?.toDate(getLocalTimeZone()),
           };
           const status = isPaid ? "paid" : "unpaid";
+
           setPaymentStatus(status);
           await sendBooking(data, status);
         }}

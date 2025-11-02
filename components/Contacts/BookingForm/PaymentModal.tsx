@@ -49,15 +49,15 @@ export default function PaymentModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleCancel} size="md">
+    <Modal isOpen={isOpen} size="md" onClose={handleCancel}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Онлайн оплата</ModalHeader>
         <ModalBody>
           <div className="space-y-4">
             <div className="bg-gradient-to-br from-black-900 to-black-800 p-6 rounded-xl text-white">
               <div className="flex items-center gap-2 mb-4">
-                <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
-                  <rect width="32" height="32" rx="6" fill="white" />
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 32 32">
+                  <rect fill="white" height="32" rx="6" width="32" />
                   <path
                     d="M8 12h16M8 16h16M8 20h10"
                     stroke="currentColor"
@@ -79,10 +79,10 @@ export default function PaymentModal({
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M5 13l4 4L19 7"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
                   />
                 </svg>
                 <span>Безпечна оплата через Monobank Acquiring</span>
@@ -95,10 +95,10 @@ export default function PaymentModal({
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M5 13l4 4L19 7"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
                   />
                 </svg>
                 <span>Підтримка Visa, Mastercard, Apple Pay, Google Pay</span>
@@ -111,10 +111,10 @@ export default function PaymentModal({
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M5 13l4 4L19 7"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M5 13l4 4L19 7"
                   />
                 </svg>
                 <span>3D Secure захист</span>
