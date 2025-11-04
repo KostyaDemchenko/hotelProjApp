@@ -2,7 +2,7 @@
 import { groq } from "next-sanity";
 
 export const roomsQuery = groq`
-  *[_type == "room"]{
+  *[_type == "room" && !(_id in path("drafts.**"))]{
     _id,
     room_id,
     room_name,
@@ -19,7 +19,7 @@ export const roomsQuery = groq`
 `;
 
 export const roomByIdQuery = groq`
-  *[_type == "room" && _id == $id][0]{
+  *[_type == "room" && _id == $id && !(_id in path("drafts.**"))][0]{
     _id,
     room_id,
     room_name,
