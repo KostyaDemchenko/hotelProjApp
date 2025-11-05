@@ -15,7 +15,7 @@ export default function RestaurantBookingPage() {
         />
       </Head>
 
-      <div className="relative h-[400px] w-full overflow-hidden">
+      <div className="relative h-[400px] w-full overflow-hidden bg-[url(https://maristella.com.ua/wp-content/uploads/2024/02/img_1968-1800x800.jpg)] bg-cover bg-center">
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
@@ -29,7 +29,7 @@ export default function RestaurantBookingPage() {
 
       <Container className="py-12">
         <div className="mx-auto max-w-3xl space-y-8">
-          <div className="text-center">
+          <div className="text-center ">
             <h2 className="mb-4 text-3xl font-bold text-gray-800">
               Забронюйте столик у ресторані «В.О.Л.Я.»
             </h2>

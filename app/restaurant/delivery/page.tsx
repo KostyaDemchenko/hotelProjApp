@@ -15,7 +15,7 @@ export default function RoomDeliveryPage() {
         />
       </Head>
 
-      <div className="relative h-[400px] w-full overflow-hidden">
+      <div className="relative h-[400px] w-full overflow-hidden bg-[url(https://img.restoclub.ru/uploads/place/d/2/4/5/d24592e793c446c5f929dfc54aad094f_w426_h278.jpg)] bg-cover bg-center">
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
